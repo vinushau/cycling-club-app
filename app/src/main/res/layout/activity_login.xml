@@ -21,13 +21,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-
             app:srcCompat="@drawable/cyclist" />
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="119dp"
-            android:backgroundTint="#FFFFFF" />
+            android:layout_height="26dp" /> <!-- Add some spacing between image and EditTexts -->
+
+        <!-- Email EditText -->
+        <EditText
+            android:id="@+id/emailField"
+            android:layout_width="300sp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="Email"
+            android:inputType="textEmailAddress" />
+
+        <!-- Password EditText -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="32dp" />
+
+        <EditText
+            android:id="@+id/passwordField"
+            android:layout_width="300sp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="Password"
+            android:inputType="textPassword" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="41dp" />
 
         <Button
             android:id="@+id/login_btn"
@@ -35,23 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:backgroundTint="#DB4D4D"
-            android:onClick="onLoginButton"
             android:text="Login" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="22dp" />
-
-        <Button
-            android:id="@+id/register_btn"
-            android:layout_width="200sp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:backgroundTint="#DB4D4D"
-            android:text="Register"
-            android:onClick="onRegisterButton"
-
-            />
 
     </LinearLayout>
 </RelativeLayout>
