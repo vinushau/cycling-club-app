@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "278549949792",
+    "project_id": "cgg-cycling",
+    "storage_bucket": "cgg-cycling.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278549949792:android:b893dd45ff0f2abf000205",
+        "android_client_info": {
+          "package_name": "com.uotttawa.lschu105.gcccyclingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYwYLTouut7qJ5-0o79EBZOW_1f9eHRKo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
