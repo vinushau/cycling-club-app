@@ -7,13 +7,19 @@
     android:gravity="center"
     android:layout_height="match_parent"
     tools:context=".WelcomePage">
-    
+
     <TextView
         android:id="@+id/user_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="User details"/>
-    
+
+    <TextView
+        android:id="@+id/roles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
     <Button
         android:text="@string/log_out"
         android:backgroundTint="#DB4D4D"
