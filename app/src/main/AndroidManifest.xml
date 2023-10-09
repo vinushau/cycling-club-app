@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,11 +15,15 @@
         android:theme="@style/Theme.GCCCyclingApp"
         tools:targetApi="31">
         <activity
+            android:name=".WelcomePage"
+            android:exported="false" />
+        <activity
             android:name=".CyclingClubAccount"
             android:exported="false" />
         <activity
             android:name=".ParticipantAccount"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Material3.Light.NoActionBar" />
         <activity
             android:name=".AccountSelection"
             android:exported="false" />
@@ -26,7 +32,8 @@
             android:exported="false" />
         <activity
             android:name=".Login"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Material3.Light.NoActionBar" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
