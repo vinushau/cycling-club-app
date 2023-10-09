@@ -15,6 +15,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class CyclingClubAccount extends AppCompatActivity {
     private FirebaseAuth auth;
@@ -63,6 +65,9 @@ public class CyclingClubAccount extends AppCompatActivity {
                             }
                         }
                     });
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference myRef = database.getReference(username);
+                    myRef.setValue("Cycling Club");
 
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 

@@ -16,7 +16,6 @@ public class WelcomePage extends AppCompatActivity {
     FirebaseAuth auth;
     Button button;
     TextView textView;
-    FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,18 +25,23 @@ public class WelcomePage extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         button = findViewById(R.id.logout);
         textView = findViewById(R.id.user_details);
-        user = auth.getCurrentUser();
-
+        FirebaseUser user = auth.getCurrentUser();
         if (user == null){
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
         }
         else{
-            String username = user.getDisplayName(), email = user.getEmail();
-            textView.setText(username.length() == 0 ? email : username);
+            String username = user.getDisplayName();
+            String email = user.getEmail();
 
+            if (username != null && !username.isEmpty()) {
+                textView.setText(username);
+            } else if (email != null) {
+                textView.setText(email);
+            }
         }
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
