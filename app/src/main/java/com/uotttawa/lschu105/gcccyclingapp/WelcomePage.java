@@ -34,7 +34,9 @@ public class WelcomePage extends AppCompatActivity {
             finish();
         }
         else{
-            textView.setText(user.getEmail());
+            String username = user.getDisplayName(), email = user.getEmail();
+            textView.setText(username.length() == 0 ? email : username);
+
         }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
