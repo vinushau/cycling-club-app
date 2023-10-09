@@ -1,10 +1,13 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -13,6 +16,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class CyclingClubAccount extends AppCompatActivity {
     private FirebaseAuth auth;
@@ -44,14 +49,28 @@ public class CyclingClubAccount extends AppCompatActivity {
     }
 
     public void registerAccount(String username, String email, String password) {
-        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(CyclingClubAccount.this, new OnCompleteListener<AuthResult>() {
+        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(CyclingClubAccount.this, "Your account is successfully registered", Toast.LENGTH_SHORT).show();
 
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
+                    user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(CyclingClubAccount.this, "Username added", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
                     Intent intent = new Intent(getApplicationContext(), Login.class);
+
                     startActivity(intent);
+
                     finish();
                 }
                 else {
@@ -59,7 +78,5 @@ public class CyclingClubAccount extends AppCompatActivity {
                 }
             }
         });
-
-        finish();
     }
 }
