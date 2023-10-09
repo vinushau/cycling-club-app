@@ -68,7 +68,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:backgroundTint="#DB4D4D"
-            android:onClick="onRegisterCyclingClubAccount"
             android:text="Register" />
 
     </LinearLayout>
