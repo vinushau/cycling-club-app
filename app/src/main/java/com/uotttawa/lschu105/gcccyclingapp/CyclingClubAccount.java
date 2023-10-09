@@ -1,13 +1,10 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -49,7 +46,7 @@ public class CyclingClubAccount extends AppCompatActivity {
     }
 
     public void registerAccount(String username, String email, String password) {
-        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(CyclingClubAccount.this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
@@ -67,11 +64,9 @@ public class CyclingClubAccount extends AppCompatActivity {
                         }
                     });
 
-                    Intent intent = new Intent(getApplicationContext(), Login.class);
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 
                     startActivity(intent);
-
-                    finish();
                 }
                 else {
                     Toast.makeText(CyclingClubAccount.this, "Registration failed", Toast.LENGTH_SHORT).show();
