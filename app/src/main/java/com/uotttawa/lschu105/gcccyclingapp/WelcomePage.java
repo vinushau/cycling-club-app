@@ -32,7 +32,6 @@ public class WelcomePage extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         button = findViewById(R.id.logout);
         textView = findViewById(R.id.user_details);
-        roles = findViewById(R.id.roles);
 
         FirebaseUser user = auth.getCurrentUser();
 
@@ -53,10 +52,7 @@ public class WelcomePage extends AppCompatActivity {
                     System.out.println(username + ": " + accountTypeValue);
 
                     if (username != null && !username.isEmpty()) {
-                        textView.setText(username);
-                        roles.setText(accountTypeValue);
-                    } else if (email != null) {
-                        textView.setText(email);
+                        textView.setText("Welcome " +username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
                     }
                 }
 

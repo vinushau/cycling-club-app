@@ -28,12 +28,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLoginButton(View view) {
-        /*Test
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-        myRef.setValue("Test");
-        */
-
         //Navigates to login page
         Intent intent = new Intent(getApplicationContext(), Login.class);
         startActivityForResult(intent, 0);

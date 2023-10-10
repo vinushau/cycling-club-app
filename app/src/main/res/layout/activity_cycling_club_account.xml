@@ -28,12 +28,12 @@
             android:layout_width="300sp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:hint="Cycling Club Name"
+            android:hint="Cycling Club Username"
             android:inputType="textEmailAddress" />
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="16sp" /> <!-- Add some spacing between image and EditTexts -->
+            android:layout_height="7sp" /> <!-- Add some spacing between image and EditTexts -->
 
         <!-- Email EditText -->
         <EditText
@@ -44,11 +44,11 @@
             android:hint="Email"
             android:inputType="textEmailAddress" />
 
-        <!-- Password EditText -->
         <Space
             android:layout_width="match_parent"
-            android:layout_height="18dp" />
+            android:layout_height="7dp" />
 
+        <!-- Password EditText -->
         <EditText
             android:id="@+id/passwordField"
             android:layout_width="300sp"
@@ -59,7 +59,7 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="20sp" />
+            android:layout_height="7sp" />
 
         <Button
             android:id="@+id/login_btn"
@@ -69,6 +69,16 @@
             android:backgroundTint="#DB4D4D"
             android:onClick="onRegisterCyclingClubAccount"
             android:text="Register" />
+
+        <TextView
+            android:id="@+id/loginNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:text="Go to login"
+            android:textSize="20sp" />
 
     </LinearLayout>
 </RelativeLayout>

@@ -9,16 +9,31 @@
     tools:context=".WelcomePage">
 
     <TextView
-        android:id="@+id/user_details"
+        android:id="@+id/welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User details"/>
+        android:fontFamily="serif"
+        android:textColor="#000000"
+        android:textSize="50sp"
+        android:text="Welcome!" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="50sp" />
 
     <TextView
-        android:id="@+id/roles"
-        android:layout_width="wrap_content"
+        android:id="@+id/user_details"
+        android:layout_width="300sp"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:gravity="center"
+        android:fontFamily="serif"
+        android:textColor="#DB4D4D"
+        android:textSize="25sp" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20sp" />
+
 
     <Button
         android:text="@string/log_out"

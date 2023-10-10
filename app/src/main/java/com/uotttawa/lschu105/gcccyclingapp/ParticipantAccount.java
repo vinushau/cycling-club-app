@@ -15,11 +15,20 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import android.widget.TextView;
 
 public class ParticipantAccount extends AppCompatActivity {
     private FirebaseAuth auth;
+    TextView textView;
+
+    // Validating fields
+    boolean invalid = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,23 +36,60 @@ public class ParticipantAccount extends AppCompatActivity {
         setContentView(R.layout.activity_participant_account);
 
         auth = FirebaseAuth.getInstance();
+
+        textView = findViewById(R.id.loginNow);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), Login.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     public void onRegisterParticipant(View view) {
-        EditText username = (EditText)findViewById(R.id.usernameField);
-        EditText email = (EditText)findViewById(R.id.emailField);
-        EditText password = (EditText)findViewById(R.id.passwordField);
+        EditText username = (EditText) findViewById(R.id.usernameField);
+        EditText email = (EditText) findViewById(R.id.emailField);
+        EditText password = (EditText) findViewById(R.id.passwordField);
 
         String str_username, str_email, str_password;
         str_username = username.getText().toString();
         str_email = email.getText().toString();
         str_password = password.getText().toString();
 
-        if (str_username.length() == 0 || str_email.length() == 0 || str_password.length() == 0) {
-            Toast.makeText(ParticipantAccount.this, "Cannot leave empty field", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            registerAccount(str_username, str_email, str_password);
+        // Check username length and spaces
+        if (str_username.length() <= 3) {
+            Toast.makeText(ParticipantAccount.this, "Username needs to have at least 4 characters.", Toast.LENGTH_LONG).show();
+        } else if (str_username.contains(" ")) {
+            Toast.makeText(ParticipantAccount.this, "Username cannot contain spaces.", Toast.LENGTH_LONG).show();
+        } else if (str_password.length() < 6) {
+            Toast.makeText(ParticipantAccount.this, "Password must be at least 6 characters long.", Toast.LENGTH_LONG).show();
+        } else if (!str_password.matches(".*[0-9].*")) {
+            Toast.makeText(ParticipantAccount.this, "Password must contain at least one number (0-9).", Toast.LENGTH_LONG).show();
+        } else if (str_password.contains(" ")) {
+            Toast.makeText(ParticipantAccount.this, "Password cannot contain spaces.", Toast.LENGTH_LONG).show();
+        } else {
+            // Proceed to check if the username is taken
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference accountTypeReference = database.child(str_username);
+
+            accountTypeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        Toast.makeText(ParticipantAccount.this, "Username is already taken.", Toast.LENGTH_LONG).show();
+                    } else {
+                        // If the username is not taken, proceed with registration
+                        registerAccount(str_username, str_email, str_password);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.err.println("Error: " + databaseError.getMessage());
+                }
+            });
         }
     }
 
@@ -74,7 +120,7 @@ public class ParticipantAccount extends AppCompatActivity {
                     startActivity(intent);
                 }
                 else {
-                    Toast.makeText(ParticipantAccount.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ParticipantAccount.this, "Email is invalid", Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -28,7 +28,7 @@
             android:layout_width="300sp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:hint="Profile Name"
+            android:hint="Participant Username"
             android:inputType="textEmailAddress" />
 
         <Space
@@ -77,14 +77,14 @@
             android:text="Register" />
 
         <TextView
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:gravity="center"
-            android:layout_marginTop="5dp"
             android:id="@+id/loginNow"
-            android:text="@string/click_to_login"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:onClick="onClick"
+            android:text="Go to login"
+            android:textSize="20sp" />
 
     </LinearLayout>
 </RelativeLayout>
