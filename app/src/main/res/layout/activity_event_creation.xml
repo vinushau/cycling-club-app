@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f7ce85"
-    tools:context=".MainActivity">
+    android:background="#ffcc79"
+    tools:context=".EventCreation">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,12 +13,12 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/EventType"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="Road Stage Race"
-            android:gravity="center"
             android:fontFamily="@font/sigmarone"
+            android:gravity="center"
             android:textColor="#DB4D4D"
             android:textSize="30sp" />
 
@@ -27,12 +27,25 @@
             android:layout_height="25dp" />
 
         <TextView
+            android:id="@+id/EventDescription"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Multi-day events.\nComposed of multiple stages with different routes and terrains.\nCyclists compete over several days.\nOverall winner determined by the\n lowest cumulative time."
-            android:gravity="center"
             android:fontFamily="serif"
+            android:gravity="center"
             android:textColor="#000000"
+            android:textSize="20sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="25dp" />
+
+        <EditText
+            android:id="@+id/eventNameField"
+            android:layout_width="300sp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="Event Name"
+            android:inputType="text"
             android:textSize="20sp" />
 
         <Space
@@ -43,10 +56,10 @@
             android:id="@+id/ageField"
             android:layout_width="300sp"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
             android:layout_gravity="center"
             android:hint="Age"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:textSize="20sp" />
 
         <Space
             android:layout_width="match_parent"
@@ -56,35 +69,34 @@
             android:id="@+id/paceField"
             android:layout_width="300sp"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
             android:layout_gravity="center"
             android:hint="Pace"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:textSize="20sp" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="25dp" />
 
-        <EditText
-            android:id="@+id/levelField"
+        <!-- Use a Spinner for the "Level" field -->
+        <Spinner
+            android:id="@+id/levelSpinner"
             android:layout_width="300sp"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
             android:layout_gravity="center"
             android:hint="Level"
-            android:inputType="textEmailAddress" />
+            android:textSize="20sp" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="25dp" />
 
         <Button
-            android:id="@+id/RoadStageRace"
-            style="@style/Widget.AppCompat.Button.Small"
+            android:id="@+id/selectGroupRides"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:backgroundTint="#db6d00"
+            android:backgroundTint="#DB4D4D"
             android:onClick=""
             android:text="Select" />
 
@@ -94,14 +106,12 @@
 
         <Button
             android:id="@+id/back"
-            style="@style/Widget.AppCompat.Button.Small"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:backgroundTint="#db6d00"
-            android:onClick=""
+            android:backgroundTint="#DB4D4D"
+            android:onClick="onBack"
             android:text="back" />
 
     </LinearLayout>
-
 </RelativeLayout>

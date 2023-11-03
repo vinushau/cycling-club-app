@@ -101,8 +101,8 @@ public class AdminAccount extends AppCompatActivity {
                     Toast.makeText(AdminAccount.this, "Your account is successfully registered", Toast.LENGTH_SHORT).show();
 
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
+
                     user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -111,15 +111,17 @@ public class AdminAccount extends AppCompatActivity {
                             }
                         }
                     });
+
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference(username);
-                    myRef.setValue("Admin");
+                    DatabaseReference myRef = database.getReference("Users").child(username); // Update the reference to the 'Users' node
+
+                    // Set the user's account type
+                    myRef.child("accounttype").setValue("Admin"); // Set the account type
+                    // You can set registered events here as well if needed
 
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-
                     startActivity(intent);
-                }
-                else {
+                } else {
                     Toast.makeText(AdminAccount.this, "Email is invalid", Toast.LENGTH_SHORT).show();
                 }
             }

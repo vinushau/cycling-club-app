@@ -102,8 +102,8 @@ public class CyclingClubAccount extends AppCompatActivity {
                     Toast.makeText(CyclingClubAccount.this, "Your account is successfully registered", Toast.LENGTH_SHORT).show();
 
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
+
                     user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -112,18 +112,20 @@ public class CyclingClubAccount extends AppCompatActivity {
                             }
                         }
                     });
+
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference(username);
-                    myRef.setValue("Cycling Club");
+                    DatabaseReference myRef = database.getReference("Users").child(username); // Update the reference to the 'Users' node
+
+                    // Set the user's account type and registered events
+                    myRef.child("accounttype").setValue("Cycling Club"); // Set the account type
+                    // You can set registered events here as well if needed
 
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-
                     startActivity(intent);
                 } else {
                     Toast.makeText(CyclingClubAccount.this, "Email is invalid", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
     }
 }

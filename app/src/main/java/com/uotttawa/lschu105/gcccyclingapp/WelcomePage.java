@@ -19,21 +19,19 @@ public class WelcomePage extends AppCompatActivity {
     FirebaseAuth auth;
     Button button;
     TextView textView;
-    Button createEventsButton; // Button for creating events
-    TextView roles; // TextView for displaying roles
+    Button createEventsButton;
+    Button viewEventsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_page);
 
-        // Reference to the Firebase Realtime Database
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-
         auth = FirebaseAuth.getInstance();
         button = findViewById(R.id.logout);
         textView = findViewById(R.id.user_details);
         createEventsButton = findViewById(R.id.createEventsButton);
+        viewEventsButton = findViewById(R.id.viewEventsButton); // Initialize viewEventsButton
 
         FirebaseUser user = auth.getCurrentUser();
 
@@ -43,54 +41,54 @@ public class WelcomePage extends AppCompatActivity {
             finish();
         } else {
             String username = user.getDisplayName();
-            String email = user.getEmail();
-            DatabaseReference accountTypeReference = database.child(username);
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
 
-            accountTypeReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String accountTypeValue = dataSnapshot.getValue(String.class);
-                    System.out.println(username + ": " + accountTypeValue);
+            if (username != null && !username.isEmpty()) {
+                DatabaseReference accountTypeReference = database.child("Users").child(username).child("accounttype");
 
-                    if (username != null && !username.isEmpty()) {
-                        textView.setText("Welcome " + username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
+                accountTypeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String accountTypeValue = dataSnapshot.getValue(String.class);
 
-                        // Check if the account type is "Cycling," and show the "create_events" button if it is
-                        if (accountTypeValue.equalsIgnoreCase("cycling club")) {
-                            createEventsButton.setVisibility(View.VISIBLE);
-                            createEventsButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(getApplicationContext(), EventManagement.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            });
+                        if (accountTypeValue != null) {
+                            textView.setText("Welcome " + username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
 
-                        }
+                            if (accountTypeValue.equalsIgnoreCase("cycling club") || accountTypeValue.equalsIgnoreCase("admin")) {
+                                createEventsButton.setVisibility(View.VISIBLE);
+                                viewEventsButton.setVisibility(View.VISIBLE);
 
-                        else if (accountTypeValue.equalsIgnoreCase("admin")) {
-                            createEventsButton.setVisibility(View.VISIBLE);
-                            createEventsButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(getApplicationContext(), EventManagement.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            });
+                                createEventsButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Intent intent = new Intent(getApplicationContext(), EventManagement.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
 
-                        }else {
-                            createEventsButton.setVisibility(View.GONE);
+                                viewEventsButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        // Start the activity for viewing events (replace with the correct activity)
+                                        Intent intent = new Intent(getApplicationContext(), ViewEvents.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
+                            } else {
+                                createEventsButton.setVisibility(View.GONE);
+                                viewEventsButton.setVisibility(View.GONE);
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    System.err.println("Error: " + databaseError.getMessage());
-                }
-            });
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.err.println("Error: " + databaseError.getMessage());
+                    }
+                });
+            }
         }
 
         button.setOnClickListener(new View.OnClickListener() {

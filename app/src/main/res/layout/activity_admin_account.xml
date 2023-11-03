@@ -17,11 +17,11 @@
             android:layout_height="wrap_content" />
 
         <ImageView
-            android:id="@+id/admin_png"
+            android:id="@+id/cyclist_png3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            app:srcCompat="@drawable/admincyclist" />
+            app:srcCompat="@drawable/cyclist" />
 
         <EditText
             android:id="@+id/usernameField"

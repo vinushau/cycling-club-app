@@ -36,15 +36,27 @@
 
     <Button
         android:id="@+id/createEventsButton"
-        style="@style/Widget.AppCompat.Button.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="#DB4D4D"
         android:text="Create Events" />
 
+    <Button
+        android:id="@+id/viewEventsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#DB4D4D"
+        android:text="View Events" />
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="20sp" />
+
+    <!-- RecyclerView for displaying events -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/eventsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <Button
         android:text="@string/log_out"
