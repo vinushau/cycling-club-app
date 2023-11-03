@@ -19,6 +19,7 @@ public class WelcomePage extends AppCompatActivity {
     FirebaseAuth auth;
     Button button;
     TextView textView;
+    Button createEventsButton; // Button for creating events
     TextView roles; // TextView for displaying roles
 
     @Override
@@ -32,15 +33,15 @@ public class WelcomePage extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         button = findViewById(R.id.logout);
         textView = findViewById(R.id.user_details);
+        createEventsButton = findViewById(R.id.createEventsButton);
 
         FirebaseUser user = auth.getCurrentUser();
 
-        if (user == null){
+        if (user == null) {
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
-        }
-        else{
+        } else {
             String username = user.getDisplayName();
             String email = user.getEmail();
             DatabaseReference accountTypeReference = database.child(username);
@@ -52,7 +53,36 @@ public class WelcomePage extends AppCompatActivity {
                     System.out.println(username + ": " + accountTypeValue);
 
                     if (username != null && !username.isEmpty()) {
-                        textView.setText("Welcome " +username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
+                        textView.setText("Welcome " + username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
+
+                        // Check if the account type is "Cycling," and show the "create_events" button if it is
+                        if (accountTypeValue.equalsIgnoreCase("cycling club")) {
+                            createEventsButton.setVisibility(View.VISIBLE);
+                            createEventsButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(getApplicationContext(), EventManagement.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+
+                        }
+
+                        else if (accountTypeValue.equalsIgnoreCase("admin")) {
+                            createEventsButton.setVisibility(View.VISIBLE);
+                            createEventsButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(getApplicationContext(), EventManagement.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+
+                        }else {
+                            createEventsButton.setVisibility(View.GONE);
+                        }
                     }
                 }
 

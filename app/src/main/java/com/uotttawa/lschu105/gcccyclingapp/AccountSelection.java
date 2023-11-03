@@ -24,5 +24,10 @@ public class AccountSelection extends AppCompatActivity {
         startActivityForResult(intent, 0);
     }
 
+    public void onAdmin(View view) {
+        //Navigates to login page
+        Intent intent = new Intent(getApplicationContext(), AdminAccount.class);
+        startActivityForResult(intent, 0);
+    }
 
 }
