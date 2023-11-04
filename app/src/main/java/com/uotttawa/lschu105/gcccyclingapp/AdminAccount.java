@@ -117,10 +117,20 @@ public class AdminAccount extends AppCompatActivity {
 
                     // Set the user's account type
                     myRef.child("accounttype").setValue("Admin"); // Set the account type
-                    // You can set registered events here as well if needed
 
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(intent);
+                    // This code ensures the account registration process is completed before redirecting to welcomepage
+                    user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(AdminAccount.this, "Username added", Toast.LENGTH_SHORT).show();
+
+                                Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
+                    });
                 } else {
                     Toast.makeText(AdminAccount.this, "Email is invalid", Toast.LENGTH_SHORT).show();
                 }
