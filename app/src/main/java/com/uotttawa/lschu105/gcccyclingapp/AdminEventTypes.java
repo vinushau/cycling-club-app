@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -150,39 +151,43 @@ public class AdminEventTypes extends AppCompatActivity {
     private void editEventType(final String oldName, final String newName, final String newDisplay, final String newDesc) {
         DatabaseReference dataRef = FirebaseDatabase.getInstance().getReference("EventTypes");
             // Update name, create a new reference to the database, and then update displayname and description
-            dataRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.hasChild(oldName)) {
-                        DatabaseReference eventRef = dataRef.child(oldName);
-                        Object eventData = snapshot.child(oldName).getValue();
+        dataRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.hasChild(oldName)) {
+                    DatabaseReference eventRef = dataRef.child(oldName);
+                    Object eventData = snapshot.child(oldName).getValue();
 
-                        dataRef.child(newName).setValue(eventData);
-                        if (oldName != newName) {
-                            eventRef.removeValue();
-                        }
-
-                        // Update eventRef to use the new name
-                        DatabaseReference newEventRef = dataRef.child(newName);
-
-                        if (!newDisplay.isEmpty()) {
-                            newEventRef.child("name").setValue(newDisplay);
-                        }
-
-                        if (!newDesc.isEmpty()) {
-                            newEventRef.child("description").setValue(newDesc);
-                        }
-
-                        Toast.makeText(getApplicationContext(), "Event Type Updated", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Event Type not found", Toast.LENGTH_LONG).show();
+                    dataRef.child(newName).setValue(eventData);
+                    if (oldName != newName) {
+                        eventRef.removeValue();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getApplicationContext(), "Database Error", Toast.LENGTH_LONG).show();
+                    // Update eventRef to use the new name
+                    DatabaseReference newEventRef = dataRef.child(newName);
+
+                    if (!newDisplay.isEmpty()) {
+                        newEventRef.child("name").setValue(newDisplay);
+                    }
+
+                    if (!newDesc.isEmpty()) {
+                        newEventRef.child("description").setValue(newDesc);
+                    }
+
+                    Toast.makeText(getApplicationContext(), "Event Type Updated", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Event Type not found", Toast.LENGTH_LONG).show();
                 }
-            });
-        }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(), "Database Error", Toast.LENGTH_LONG).show();
+            }
+        });
     }
+    public void onBackPressed() {
+        Intent intent = new Intent(this, WelcomePage.class);
+        startActivity(intent);
+    }
+}
