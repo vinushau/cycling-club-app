@@ -21,6 +21,7 @@ public class WelcomePage extends AppCompatActivity {
     TextView textView;
     Button createEventsButton;
     Button viewEventsButton;
+    Button editEventTypesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class WelcomePage extends AppCompatActivity {
         textView = findViewById(R.id.user_details);
         createEventsButton = findViewById(R.id.createEventsButton);
         viewEventsButton = findViewById(R.id.viewEventsButton); // Initialize viewEventsButton
+        editEventTypesButton = findViewById(R.id.editEventTypesButton);
 
         FirebaseUser user = auth.getCurrentUser();
 
@@ -57,6 +59,7 @@ public class WelcomePage extends AppCompatActivity {
                             if (accountTypeValue.equalsIgnoreCase("cycling club") || accountTypeValue.equalsIgnoreCase("admin")) {
                                 createEventsButton.setVisibility(View.VISIBLE);
                                 viewEventsButton.setVisibility(View.VISIBLE);
+                                editEventTypesButton.setVisibility(View.VISIBLE);
 
                                 createEventsButton.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -76,9 +79,20 @@ public class WelcomePage extends AppCompatActivity {
                                         finish();
                                     }
                                 });
+
+                                editEventTypesButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        // Start the activity for viewing events (replace with the correct activity)
+                                        Intent intent = new Intent(getApplicationContext(), AdminEventTypes.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
                             } else {
                                 createEventsButton.setVisibility(View.GONE);
                                 viewEventsButton.setVisibility(View.GONE);
+                                editEventTypesButton.setVisibility(View.GONE);
                             }
                         }
                     }

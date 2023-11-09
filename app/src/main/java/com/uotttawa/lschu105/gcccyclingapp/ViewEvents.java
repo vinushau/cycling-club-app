@@ -4,8 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+import android.app.AlertDialog;
+import android.view.LayoutInflater;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -81,6 +85,7 @@ public class ViewEvents extends AppCompatActivity {
         Intent intent = new Intent(this, WelcomePage.class);
         startActivity(intent);
     }
+
     public void removeEvent(){
         //Allow the admin to delete events
     }
