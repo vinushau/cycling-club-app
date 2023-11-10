@@ -8,8 +8,10 @@
     tools:context=".EventCreation">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <TextView
@@ -46,33 +48,12 @@
             android:layout_gravity="center"
             android:hint="Event Name"
             android:inputType="text"
+            android:textAlignment="center"
             android:textSize="20sp" />
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="25dp" />
-
-        <EditText
-            android:id="@+id/ageField"
-            android:layout_width="300sp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:hint="Age"
-            android:inputType="textEmailAddress"
-            android:textSize="20sp" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="25dp" />
-
-        <EditText
-            android:id="@+id/paceField"
-            android:layout_width="300sp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:hint="Pace"
-            android:inputType="textEmailAddress"
-            android:textSize="20sp" />
 
         <Space
             android:layout_width="match_parent"
