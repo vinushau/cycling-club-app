@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ public class AdminEventTypes extends AppCompatActivity {
     ListView listViewEventTypes;
     List<String> eventTypes;
     DatabaseReference databaseProducts;
+    private LinearLayout updateDialogLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +38,7 @@ public class AdminEventTypes extends AppCompatActivity {
         setContentView(R.layout.activity_admin_event_types);
 
         listViewEventTypes = findViewById(R.id.listViewEventTypes);
-
         databaseProducts = FirebaseDatabase.getInstance().getReference("EventTypes");
-
         eventTypes = new ArrayList<>();
 
         listViewEventTypes.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -50,6 +50,7 @@ public class AdminEventTypes extends AppCompatActivity {
             }
         });
     }
+
 
     @Override
     protected void onStart() {
@@ -87,6 +88,9 @@ public class AdminEventTypes extends AppCompatActivity {
         final View dialogView = inflater.inflate(R.layout.activity_update_dialog, null);
         dialogBuilder.setView(dialogView);
 
+        // Initialize updateDialogLayout
+        updateDialogLayout = dialogView.findViewById(R.id.edit_dialog_layout);
+
         final EditText editTextName = dialogView.findViewById(R.id.editTextName);
         final EditText editTextDisplay = dialogView.findViewById(R.id.editTextDisplay);
         final EditText editTextDesc = dialogView.findViewById(R.id.editTextDesc);
@@ -110,6 +114,13 @@ public class AdminEventTypes extends AppCompatActivity {
                     newName = eventName;
                 }
 
+                if (!TextFieldValidation()) {
+                    Toast.makeText(getApplicationContext(), "Please enter text in all fields", Toast.LENGTH_LONG).show();
+                    // Don't proceed further if validation fails
+                    return;
+                }
+
+                // Validation passed, proceed with the update
                 editEventType(eventName, newName, newDisplay, newDesc);
                 b.dismiss();
             }
@@ -148,9 +159,23 @@ public class AdminEventTypes extends AppCompatActivity {
         });
     }
 
+    private boolean TextFieldValidation() {
+        for (int i = 0; i < updateDialogLayout.getChildCount(); i++) {
+            View childView = updateDialogLayout.getChildAt(i);
+
+            if (childView instanceof EditText) {
+                EditText editText = (EditText) childView;
+                if (editText.getText().toString().trim().isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private void editEventType(final String oldName, final String newName, final String newDisplay, final String newDesc) {
         DatabaseReference dataRef = FirebaseDatabase.getInstance().getReference("EventTypes");
-            // Update name, create a new reference to the database, and then update displayname and description
+        // Update name, create a new reference to the database, and then update displayname and description
         dataRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -159,7 +184,7 @@ public class AdminEventTypes extends AppCompatActivity {
                     Object eventData = snapshot.child(oldName).getValue();
 
                     dataRef.child(newName).setValue(eventData);
-                    if (oldName != newName) {
+                    if (!oldName.equals(newName)) {
                         eventRef.removeValue();
                     }
 
@@ -186,6 +211,7 @@ public class AdminEventTypes extends AppCompatActivity {
             }
         });
     }
+
     public void onBackPressed() {
         Intent intent = new Intent(this, WelcomePage.class);
         startActivity(intent);

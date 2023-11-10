@@ -116,50 +116,66 @@ public class EventCreation extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String username = user.getDisplayName();
 
-        DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events");
+        if (!TextFieldValidation()) {
+            Toast.makeText(getApplicationContext(), "Please enter text in all fields", Toast.LENGTH_LONG).show();
+        } else {
+            DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events");
 
-        userEventsReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                long eventCount = dataSnapshot.getChildrenCount();
-                String nextIndex = String.valueOf(eventCount);
+            userEventsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    long eventCount = dataSnapshot.getChildrenCount();
+                    String nextIndex = String.valueOf(eventCount);
 
-                DatabaseReference eventReference = databaseReference.child(eventName);
-                eventReference.child("EventType").setValue(buttonName);
+                    DatabaseReference eventReference = databaseReference.child(eventName);
+                    eventReference.child("EventType").setValue(buttonName);
 
-                for (int i = 0; i < linearLayout.getChildCount(); i++) {
-                    if (linearLayout.getChildAt(i) instanceof EditText) {
-                        EditText editText = (EditText) linearLayout.getChildAt(i);
-                        String requirementKey = editText.getHint().toString().toLowerCase();
-                        String requirementValue = editText.getText().toString();
-                        eventReference.child(requirementKey).setValue(requirementValue);
+                    for (int i = 0; i < linearLayout.getChildCount(); i++) {
+                        if (linearLayout.getChildAt(i) instanceof EditText) {
+                            EditText editText = (EditText) linearLayout.getChildAt(i);
+                            String requirementKey = editText.getHint().toString().toLowerCase();
+                            String requirementValue = editText.getText().toString();
+                            eventReference.child(requirementKey).setValue(requirementValue);
+                        }
                     }
+
+                    eventReference.child("Difficulty Level").setValue(difficultyLevel);
+                    eventReference.child("CreatedBy").setValue(username);
+
+                    DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events").child(nextIndex);
+                    userEventsReference.setValue(eventName);
+
+                    eventNameField.setText("");
+                    levelSpinner.setSelection(0);
+
+                    Toast.makeText(EventCreation.this, "Event created successfully", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+                    startActivity(intent);
+                    finish();
                 }
 
-                eventReference.child("Difficulty Level").setValue(difficultyLevel);
-                eventReference.child("CreatedBy").setValue(username);
-
-                DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events").child(nextIndex);
-                userEventsReference.setValue(eventName);
-
-                eventNameField.setText("");
-                levelSpinner.setSelection(0);
-
-                Toast.makeText(EventCreation.this, "Event created successfully", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
-                startActivity(intent);
-                finish();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+        }
     }
 
     public void onBack(View view) {
         Intent intent = new Intent(getApplicationContext(), EventManagement.class);
         startActivity(intent);
         finish();
+    }
+
+    private boolean TextFieldValidation() {
+        for (int i = 0; i < linearLayout.getChildCount(); i++) {
+            if (linearLayout.getChildAt(i) instanceof EditText) {
+                EditText editText = (EditText) linearLayout.getChildAt(i);
+                if (editText.getText().toString().trim().isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
