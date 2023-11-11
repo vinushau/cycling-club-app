@@ -61,7 +61,7 @@ public class EventCreation extends AppCompatActivity {
         linearLayout = findViewById(R.id.linearLayout);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("Events");
-        String[] levelOptions = {"Difficulty Level", "Beginner", "Intermediate", "Advanced"};
+        String[] levelOptions = {"Difficulty Level", "Beginner", "Intermediate", "Advanced", "All"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, levelOptions) {
             @Override
@@ -116,53 +116,57 @@ public class EventCreation extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String username = user.getDisplayName();
 
-        if (!TextFieldValidation()) {
-            Toast.makeText(getApplicationContext(), "Please enter text in all fields", Toast.LENGTH_LONG).show();
+        if (!TextFieldValidation() || difficultyLevel.equals("Difficulty Level")) {
+            Toast.makeText(getApplicationContext(), "Please enter text in all fields and select a difficulty level", Toast.LENGTH_LONG).show();
         } else {
-            DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events");
+            DatabaseReference eventsReference = FirebaseDatabase.getInstance().getReference("Events");
 
-            userEventsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            eventsReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    long eventCount = dataSnapshot.getChildrenCount();
-                    String nextIndex = String.valueOf(eventCount);
+                    if (dataSnapshot.hasChild(eventName)) {
+                        // Event with the same name already exists
+                        Toast.makeText(getApplicationContext(), "Event with this name already exists. Please choose a different name.", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Event name is unique, proceed with creation
+                        DatabaseReference eventReference = eventsReference.child(eventName);
+                        eventReference.child("EventType").setValue(buttonName);
 
-                    DatabaseReference eventReference = databaseReference.child(eventName);
-                    eventReference.child("EventType").setValue(buttonName);
-
-                    for (int i = 0; i < linearLayout.getChildCount(); i++) {
-                        if (linearLayout.getChildAt(i) instanceof EditText) {
-                            EditText editText = (EditText) linearLayout.getChildAt(i);
-                            String requirementKey = editText.getHint().toString().toLowerCase();
-                            String requirementValue = editText.getText().toString();
-                            eventReference.child(requirementKey).setValue(requirementValue);
+                        for (int i = 0; i < linearLayout.getChildCount(); i++) {
+                            if (linearLayout.getChildAt(i) instanceof EditText) {
+                                EditText editText = (EditText) linearLayout.getChildAt(i);
+                                String requirementKey = editText.getHint().toString().toLowerCase();
+                                String requirementValue = editText.getText().toString();
+                                eventReference.child(requirementKey).setValue(requirementValue);
+                            }
                         }
+
+                        eventReference.child("Difficulty Level").setValue(difficultyLevel);
+                        eventReference.child("CreatedBy").setValue(username);
+
+                        DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events").child(eventName);
+                        userEventsReference.setValue(eventName);
+
+                        eventNameField.setText("");
+                        levelSpinner.setSelection(0);
+
+                        Toast.makeText(EventCreation.this, "Event created successfully", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+                        startActivity(intent);
+                        finish();
                     }
-
-                    eventReference.child("Difficulty Level").setValue(difficultyLevel);
-                    eventReference.child("CreatedBy").setValue(username);
-
-                    DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events").child(nextIndex);
-                    userEventsReference.setValue(eventName);
-
-                    eventNameField.setText("");
-                    levelSpinner.setSelection(0);
-
-                    Toast.makeText(EventCreation.this, "Event created successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
-                    startActivity(intent);
-                    finish();
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    // Handle onCancelled event
                 }
             });
         }
     }
 
     public void onBack(View view) {
-        Intent intent = new Intent(getApplicationContext(), EventManagement.class);
+        Intent intent = new Intent(getApplicationContext(), EventTypeSelector.class);
         startActivity(intent);
         finish();
     }

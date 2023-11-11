@@ -87,6 +87,6 @@ public class ViewEvents extends AppCompatActivity {
     }
 
     public void removeEvent(){
-        //Allow the admin to delete events
+        //Allow the admin to delete events deliverable 3
     }
 }

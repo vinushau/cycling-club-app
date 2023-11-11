@@ -27,9 +27,6 @@ public class ParticipantAccount extends AppCompatActivity {
     private FirebaseAuth auth;
     TextView textView;
 
-    // Validating fields
-    boolean invalid = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +77,6 @@ public class ParticipantAccount extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
                         Toast.makeText(ParticipantAccount.this, "Username is already taken.", Toast.LENGTH_LONG).show();
                     } else {
-                        // If the username is not taken, proceed with registration
                         registerAccount(str_username, str_email, str_password);
                     }
                 }
@@ -113,12 +109,8 @@ public class ParticipantAccount extends AppCompatActivity {
                     });
 
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference myRef = database.getReference("Users").child(username); // Update the reference to the 'Users' node
-
-                    // Set the user's account type
-                    myRef.child("accounttype").setValue("Participant"); // Set the account type
-
-                    // This code ensures the account registration process is completed before redirecting to welcomepage
+                    DatabaseReference myRef = database.getReference("Users").child(username);
+                    myRef.child("accounttype").setValue("Participant");
                     user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {

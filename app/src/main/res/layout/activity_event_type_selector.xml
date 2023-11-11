@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffcc79"
-    tools:context=".EventManagement">
+    tools:context=".EventTypeSelector">
     <!-- Background color appears as expected in the emulator. Just looks off in preview. -->
 
     <LinearLayout

@@ -23,9 +23,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize FirebaseAuth
         mAuth = FirebaseAuth.getInstance();
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
 
     public void onLoginButton(View view) {
         //Navigates to login page
@@ -34,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onRegisterButton(View view) {
-        // Navigates to the register page
+        // Navigates to the selection page
         Intent intent = new Intent(getApplicationContext(), AccountSelection.class);
         startActivityForResult(intent, 0);
     }

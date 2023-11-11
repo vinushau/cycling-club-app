@@ -54,58 +54,68 @@ public class Login extends AppCompatActivity {
         buttonLogin = findViewById(R.id.login_btn);
         progressBar = findViewById(R.id.progressBar);
         textView = findViewById(R.id.registerNow);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), AccountSelection.class);
-                startActivity(intent);
-                finish();
-            }
+        textView.setOnClickListener(view -> {
+            Intent intent = new Intent(getApplicationContext(), AccountSelection.class);
+            startActivity(intent);
+            finish();
         });
 
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                progressBar.setVisibility(View.VISIBLE);
-                String email, password;
-                email = String.valueOf(editTextEmail.getText());
-                password = String.valueOf(editTextPassword.getText().toString());
+        buttonLogin.setOnClickListener(view -> {
+            progressBar.setVisibility(View.VISIBLE);
+            String email, password;
+            email = String.valueOf(editTextEmail.getText());
+            password = String.valueOf(editTextPassword.getText().toString());
 
-                if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(Login.this, "Enter email", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+            if (TextUtils.isEmpty(email)) {
+                Toast.makeText(Login.this, "Enter email", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(Login.this, "Enter password", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+            if (TextUtils.isEmpty(password)) {
+                Toast.makeText(Login.this, "Enter password", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                if (email.equals(ADMIN_EMAIL) && password.equals(ADMIN_PASSWORD)) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getApplicationContext(), "Admin Login Successful", Toast.LENGTH_SHORT).show();
-                    Intent adminIntent = new Intent(getApplicationContext(), AdminAccount.class);
-                    startActivity(adminIntent);
-                    finish();
-                } else {
-                    // Regular user login
-                    mAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    progressBar.setVisibility(View.GONE);
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_SHORT).show();
-                                        Intent userIntent = new Intent(getApplicationContext(), WelcomePage.class);
-                                        startActivity(userIntent);
-                                        finish();
-                                    } else {
-                                        Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                                    }
+            if (email.equals("admin") && password.equals("admin")) {
+                // Admin login
+                signInAdmin();
+            } else {
+                mAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                progressBar.setVisibility(View.GONE);
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_SHORT).show();
+                                    Intent userIntent = new Intent(getApplicationContext(), WelcomePage.class);
+                                    startActivity(userIntent);
+                                    finish();
+                                } else {
+                                    Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                }
+                            }
+                        });
             }
         });
     }
+
+
+    private void signInAdmin() {
+        mAuth.signInWithEmailAndPassword("admin@gmail.com", "asdasdasd123")
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        progressBar.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Admin Login Successful", Toast.LENGTH_SHORT).show();
+                            Intent adminIntent = new Intent(getApplicationContext(), WelcomePage.class);
+                            startActivity(adminIntent);
+                            finish();
+                        } else {
+                            Toast.makeText(Login.this, "Admin Authentication failed.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
 }

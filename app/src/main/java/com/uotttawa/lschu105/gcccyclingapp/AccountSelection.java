@@ -14,18 +14,18 @@ public class AccountSelection extends AppCompatActivity {
         setContentView(R.layout.activity_account_type);
     }
     public void onParticipant(View view) {
-        //Navigates to login page
+        //Navigates to ParticipantAccount
         Intent intent = new Intent(getApplicationContext(), ParticipantAccount.class);
         startActivityForResult(intent, 0);
     }
     public void onCyclingClub(View view) {
-        //Navigates to login page
+        //Navigates to CyclingClubAccount
         Intent intent = new Intent(getApplicationContext(), CyclingClubAccount.class);
         startActivityForResult(intent, 0);
     }
 
     public void onAdmin(View view) {
-        //Navigates to login page
+        //Navigates to AdminAccount
         Intent intent = new Intent(getApplicationContext(), AdminAccount.class);
         startActivityForResult(intent, 0);
     }

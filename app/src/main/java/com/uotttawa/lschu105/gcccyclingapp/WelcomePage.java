@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -16,12 +17,13 @@ import com.google.firebase.database.ValueEventListener;
 
 public class WelcomePage extends AppCompatActivity {
 
-    FirebaseAuth auth;
-    Button button;
-    TextView textView;
-    Button createEventsButton;
-    Button viewEventsButton;
-    Button editEventTypesButton;
+    private FirebaseAuth auth;
+    private Button button;
+    private TextView textView;
+    private Button createEventsButton;
+    private Button viewEventsButton;
+    private Button editEventTypesButton;
+    private Button editUsersButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +34,9 @@ public class WelcomePage extends AppCompatActivity {
         button = findViewById(R.id.logout);
         textView = findViewById(R.id.user_details);
         createEventsButton = findViewById(R.id.createEventsButton);
-        viewEventsButton = findViewById(R.id.viewEventsButton); // Initialize viewEventsButton
+        viewEventsButton = findViewById(R.id.viewEventsButton);
         editEventTypesButton = findViewById(R.id.editEventTypesButton);
+        editUsersButton = findViewById(R.id.editUsers);
 
         FirebaseUser user = auth.getCurrentUser();
 
@@ -56,43 +59,62 @@ public class WelcomePage extends AppCompatActivity {
                         if (accountTypeValue != null) {
                             textView.setText("Welcome " + username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
 
-                            if (accountTypeValue.equalsIgnoreCase("cycling club") || accountTypeValue.equalsIgnoreCase("admin")) {
+                            createEventsButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(getApplicationContext(), EventTypeSelector.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+
+                            viewEventsButton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    // Start the activity for viewing events (replace with the correct activity)
+                                    Intent intent = new Intent(getApplicationContext(), ViewEvents.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+
+                            if (accountTypeValue.equalsIgnoreCase("admin")) {
                                 createEventsButton.setVisibility(View.VISIBLE);
                                 viewEventsButton.setVisibility(View.VISIBLE);
                                 editEventTypesButton.setVisibility(View.VISIBLE);
-
-                                createEventsButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        Intent intent = new Intent(getApplicationContext(), EventManagement.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                });
-
-                                viewEventsButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        // Start the activity for viewing events (replace with the correct activity)
-                                        Intent intent = new Intent(getApplicationContext(), ViewEvents.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                });
+                                editUsersButton.setVisibility(View.VISIBLE);
 
                                 editEventTypesButton.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        // Start the activity for viewing events (replace with the correct activity)
+                                        // Start the activity for editing event types (replace with the correct activity)
                                         Intent intent = new Intent(getApplicationContext(), AdminEventTypes.class);
                                         startActivity(intent);
                                         finish();
                                     }
                                 });
+
+                                editUsersButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        // Start the activity for editing users (replace with the correct activity)
+                                        Intent intent = new Intent(getApplicationContext(), AccountManagement.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
+                            } else if (accountTypeValue.equalsIgnoreCase("cycling club")) {
+                                // For Cycling Club accounts
+                                createEventsButton.setVisibility(View.VISIBLE);
+                                viewEventsButton.setVisibility(View.VISIBLE);
+                                editEventTypesButton.setVisibility(View.GONE); // Hide for non-admin users
+                                editUsersButton.setVisibility(View.GONE); // Hide for non-admin users
                             } else {
+                                // For other account types
                                 createEventsButton.setVisibility(View.GONE);
                                 viewEventsButton.setVisibility(View.GONE);
                                 editEventTypesButton.setVisibility(View.GONE);
+                                editUsersButton.setVisibility(View.GONE);
                             }
                         }
                     }

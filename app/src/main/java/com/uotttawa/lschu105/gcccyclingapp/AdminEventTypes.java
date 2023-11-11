@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -25,6 +26,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AdminEventTypes extends AppCompatActivity {
     ListView listViewEventTypes;
@@ -49,92 +52,298 @@ public class AdminEventTypes extends AppCompatActivity {
                 return true;
             }
         });
-    }
 
+        Button buttonEventType = findViewById(R.id.buttonEventType);
+        buttonEventType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddEventTypeDialog();
+            }
+        });
+
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        // attach value event listener
         databaseProducts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // clear the previous products list
                 eventTypes.clear();
-
-                // iterate through all the nodes
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    // add product to list
                     eventTypes.add(postSnapshot.getKey());
                 }
 
-                // create adapter
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(AdminEventTypes.this, android.R.layout.simple_list_item_1, eventTypes);
-                // attach adapter to the listview
                 listViewEventTypes.setAdapter(adapter);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle the error
             }
         });
     }
 
-    private void showUpdateDeleteDialog(final String eventName) {
+    // Method to show the update dialog for a selected event type
+    private void showUpdateDeleteDialog(String eventType) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.activity_update_dialog, null);
         dialogBuilder.setView(dialogView);
 
-        // Initialize updateDialogLayout
         updateDialogLayout = dialogView.findViewById(R.id.edit_dialog_layout);
 
+        int[] editTextCounter = {0};
         final EditText editTextName = dialogView.findViewById(R.id.editTextName);
         final EditText editTextDisplay = dialogView.findViewById(R.id.editTextDisplay);
         final EditText editTextDesc = dialogView.findViewById(R.id.editTextDesc);
+        Button buttonEditName = dialogView.findViewById(R.id.buttonEditName);
+        Button buttonEditDisplay = dialogView.findViewById(R.id.buttonEditDisplay);
+        Button buttonEditDesc = dialogView.findViewById(R.id.buttonEditDesc);
 
-        final Button buttonUpdate = dialogView.findViewById(R.id.buttonUpdateProduct);
-        final Button buttonDelete = dialogView.findViewById(R.id.buttonDeleteProduct);
+        buttonEditName.setOnClickListener(v -> {
+            editTextName.setFocusableInTouchMode(true);
+            editTextName.setClickable(true);
+            editTextName.setCursorVisible(true);
+            if (buttonEditName.getText() == "Clear"){
+                editTextName.setText("");
+            }
+            buttonEditName.setText("Clear");
+        });
 
-        dialogBuilder.setTitle(eventName);
+        buttonEditDisplay.setOnClickListener(v -> {
+            editTextDisplay.setFocusableInTouchMode(true);
+            editTextDisplay.setClickable(true);
+            editTextDisplay.setCursorVisible(true);
+            if (buttonEditDisplay.getText() == "Clear"){
+                editTextDisplay.setText("");
+            }
+            buttonEditDisplay.setText("Clear");
+        });
+
+        buttonEditDesc.setOnClickListener(v -> {
+            editTextDesc.setFocusableInTouchMode(true);
+            editTextDesc.setClickable(true);
+            editTextDesc.setCursorVisible(true);
+            if (buttonEditDesc.getText() == "Clear"){
+                editTextDesc.setText("");
+            }
+            buttonEditDesc.setText("Clear");
+        });
+
+        editTextName.setText(eventType);
+        DatabaseReference eventTypeRef = databaseProducts.child(eventType);
+        eventTypeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String eventName = dataSnapshot.child("name").getValue(String.class);
+                String eventDesc = dataSnapshot.child("description").getValue(String.class);
+
+                editTextDisplay.setText(eventName);
+                editTextDesc.setText(eventDesc);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle the error if needed
+            }
+        });
+
+        getRequirementsForEventType(eventType, new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot requirementSnapshot : dataSnapshot.getChildren()) {
+                        String requirementValue = requirementSnapshot.getValue(String.class);
+
+                        LinearLayout linearLayout = new LinearLayout(getApplicationContext());
+                        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+                        EditText editTextRequirement = new EditText(getApplicationContext());
+                        editTextRequirement.setText(requirementValue);
+                        editTextRequirement.setId(editTextCounter[0]++);
+
+                        editTextRequirement.setFocusable(false);
+                        editTextRequirement.setClickable(false);
+                        editTextRequirement.setCursorVisible(false);
+
+                        LinearLayout.LayoutParams editTextParams = new LinearLayout.LayoutParams(
+                                0,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                1.0f
+                        );
+                        editTextRequirement.setLayoutParams(editTextParams);
+
+                        Button editButton = new Button(getApplicationContext());
+                        editButton.setText("Edit");
+
+                        editButton.setOnClickListener(v -> {
+                            editTextRequirement.setFocusableInTouchMode(true);
+                            editTextRequirement.setClickable(true);
+                            editTextRequirement.setCursorVisible(true);
+                            if (editButton.getText() == "Clear"){
+                                editTextRequirement.setText("");
+                            }
+                            editButton.setText("Clear");
+
+                        });
+
+                        linearLayout.addView(editTextRequirement);
+                        linearLayout.addView(editButton);
+
+                        updateDialogLayout.addView(linearLayout);
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
+        final Button buttonUpdate = dialogView.findViewById(R.id.buttonAddRequirement);
+        final Button buttonDelete = dialogView.findViewById(R.id.buttonCreateEventType);
+
+        dialogBuilder.setTitle(eventType);
         final AlertDialog b = dialogBuilder.create();
         b.show();
 
-        buttonUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String newName = editTextName.getText().toString().trim();
-                String newDisplay = editTextDisplay.getText().toString().trim();
-                String newDesc = editTextDesc.getText().toString().trim();
+        buttonUpdate.setOnClickListener(view -> {
+            String newName = editTextName.getText().toString().trim();
+            String newDisplay = editTextDisplay.getText().toString().trim();
+            String newDesc = editTextDesc.getText().toString().trim();
 
-                if (TextUtils.isEmpty(newName)) {
-                    // If newName is empty, assume the old name
-                    newName = eventName;
-                }
-
-                if (!TextFieldValidation()) {
-                    Toast.makeText(getApplicationContext(), "Please enter text in all fields", Toast.LENGTH_LONG).show();
-                    // Don't proceed further if validation fails
-                    return;
-                }
-
-                // Validation passed, proceed with the update
-                editEventType(eventName, newName, newDisplay, newDesc);
-                b.dismiss();
+            if (TextUtils.isEmpty(newName)) {
+                newName = eventType;
             }
+
+            if (TextUtils.isEmpty(newDisplay) || TextUtils.isEmpty(newDesc) || !textFieldValidation()) {
+                Toast.makeText(getApplicationContext(), "Please enter text in all fields", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            Map<String, String> requirements = new HashMap<>();
+
+            for (int i = 0; i < updateDialogLayout.getChildCount(); i++) {
+                EditText editTextRequirement = updateDialogLayout.findViewById(i);
+
+                if (editTextRequirement != null) {
+                    String requirementText = editTextRequirement.getText().toString();
+                    requirements.put("" + (i), requirementText);
+                }
+            }
+
+            editEventType(eventType, newName, newDisplay, newDesc, requirements);
+            b.dismiss();
         });
 
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                deleteEventType(eventName);
+                deleteEventType(eventType);
                 b.dismiss();
             }
         });
     }
 
+    private void getRequirementsForEventType(String eventType, ValueEventListener valueEventListener) {
+        DatabaseReference requirementsRef = databaseProducts.child(eventType).child("Requirements");
+        requirementsRef.addListenerForSingleValueEvent(valueEventListener);
+    }
+
+    // Method to show the dialog for adding a new event type
+    private void showAddEventTypeDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.activity_eventtype_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText editTextName = dialogView.findViewById(R.id.editTextName);
+        final EditText editTextDisplay = dialogView.findViewById(R.id.editTextDisplay);
+        final EditText editTextDesc = dialogView.findViewById(R.id.editTextDesc);
+        LinearLayout requirementsLayout = dialogView.findViewById(R.id.requirementsLayout);
+
+        Button addRequirementButton = dialogView.findViewById(R.id.buttonAddRequirement);
+        Button buttonCreateEventType = dialogView.findViewById(R.id.buttonCreateEventType);
+
+        addRequirementButton.setOnClickListener(view -> {
+            EditText newEditText = new EditText(getApplicationContext());
+            newEditText.setHint("Requirement");
+            newEditText.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ));
+
+            requirementsLayout.addView(newEditText);
+        });
+
+        dialogBuilder.setTitle("Add Event Type");
+
+        buttonCreateEventType.setOnClickListener(view -> {
+            String newName = editTextName.getText().toString().trim();
+            String newDisplay = editTextDisplay.getText().toString().trim();
+            String newDesc = editTextDesc.getText().toString().trim();
+
+            boolean allFieldsFilled = true;
+
+            // Check if any of the requirements are empty
+            for (int j = 0; j < requirementsLayout.getChildCount(); j++) {
+                View childView = requirementsLayout.getChildAt(j);
+                if (childView instanceof EditText) {
+                    EditText editText = (EditText) childView;
+                    String requirement = editText.getText().toString().trim();
+                    if (TextUtils.isEmpty(requirement)) {
+                        editText.setError("This field cannot be empty");
+                        allFieldsFilled = false;
+                    }
+                }
+            }
+
+            if (TextUtils.isEmpty(newName)) {
+                editTextName.setError("This field cannot be empty");
+                allFieldsFilled = false;
+            }
+
+            if (TextUtils.isEmpty(newDisplay)) {
+                editTextDisplay.setError("This field cannot be empty");
+                allFieldsFilled = false;
+            }
+
+            if (TextUtils.isEmpty(newDesc)) {
+                editTextDesc.setError("This field cannot be empty");
+                allFieldsFilled = false;
+            }
+
+            if (allFieldsFilled) {
+                Map<String, String> requirements = new HashMap<>();
+                for (int j = 0; j < requirementsLayout.getChildCount(); j++) {
+                    View childView = requirementsLayout.getChildAt(j);
+                    if (childView instanceof EditText) {
+                        EditText editText = (EditText) childView;
+                        String requirement = editText.getText().toString().trim();
+                        requirements.put("" + (j), requirement);
+                    }
+                }
+
+                createEventType(newName, newDisplay, newDesc, requirements);
+            }
+        });
+
+        AlertDialog b = dialogBuilder.create();
+        b.show();
+    }
+
+    // Method to create a new event type in Firebase
+    private void createEventType(String name, String display, String desc, Map<String, String> requirements) {
+        DatabaseReference eventRef = databaseProducts.child(name);
+        eventRef.child("name").setValue(display);
+        eventRef.child("description").setValue(desc);
+        eventRef.child("Requirements").setValue(requirements);
+        Toast.makeText(getApplicationContext(), "Event Type Created", Toast.LENGTH_SHORT).show();
+    }
+
+    // Method to delete an event type from Firebase
     private void deleteEventType(String eventName) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("EventTypes");
 
@@ -154,18 +363,27 @@ public class AdminEventTypes extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Handle errors if needed
             }
         });
     }
 
-    private boolean TextFieldValidation() {
-        for (int i = 0; i < updateDialogLayout.getChildCount(); i++) {
-            View childView = updateDialogLayout.getChildAt(i);
+    private boolean textFieldValidation() {
+        return validateEditTexts(updateDialogLayout);
+    }
+
+    // Recursive method to validate all EditText fields in a ViewGroup
+    private boolean validateEditTexts(ViewGroup viewGroup) {
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            View childView = viewGroup.getChildAt(i);
 
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
                 if (editText.getText().toString().trim().isEmpty()) {
+                    return false;
+                }
+            } else if (childView instanceof ViewGroup) {
+                // Recursive call for nested ViewGroups
+                if (!validateEditTexts((ViewGroup) childView)) {
                     return false;
                 }
             }
@@ -173,9 +391,9 @@ public class AdminEventTypes extends AppCompatActivity {
         return true;
     }
 
-    private void editEventType(final String oldName, final String newName, final String newDisplay, final String newDesc) {
+    // Method to edit an existing event type in Firebase
+    private void editEventType(final String oldName, final String newName, final String newDisplay, final String newDesc, Map<String, String> requirements) {
         DatabaseReference dataRef = FirebaseDatabase.getInstance().getReference("EventTypes");
-        // Update name, create a new reference to the database, and then update displayname and description
         dataRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -188,7 +406,6 @@ public class AdminEventTypes extends AppCompatActivity {
                         eventRef.removeValue();
                     }
 
-                    // Update eventRef to use the new name
                     DatabaseReference newEventRef = dataRef.child(newName);
 
                     if (!newDisplay.isEmpty()) {
@@ -199,6 +416,7 @@ public class AdminEventTypes extends AppCompatActivity {
                         newEventRef.child("description").setValue(newDesc);
                     }
 
+                    newEventRef.child("Requirements").setValue(requirements);
                     Toast.makeText(getApplicationContext(), "Event Type Updated", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getApplicationContext(), "Event Type not found", Toast.LENGTH_LONG).show();
@@ -213,6 +431,7 @@ public class AdminEventTypes extends AppCompatActivity {
     }
 
     public void onBackPressed() {
+        super.onBackPressed();
         Intent intent = new Intent(this, WelcomePage.class);
         startActivity(intent);
     }

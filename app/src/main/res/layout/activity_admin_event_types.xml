@@ -7,6 +7,13 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/buttonEventType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Event Type"
+        android:backgroundTint="#DB4D4D"/>
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
