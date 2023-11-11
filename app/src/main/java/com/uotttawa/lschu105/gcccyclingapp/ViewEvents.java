@@ -85,8 +85,4 @@ public class ViewEvents extends AppCompatActivity {
         Intent intent = new Intent(this, WelcomePage.class);
         startActivity(intent);
     }
-
-    public void removeEvent(){
-        //Allow the admin to delete events deliverable 3
-    }
 }

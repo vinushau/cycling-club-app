@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+            Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
         }
