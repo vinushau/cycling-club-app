@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,67 +13,39 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GCCCyclingApp"
-        tools:targetApi="31" >
+        tools:targetApi="31">
         <activity
-            android:name=".CreateEventType"
+            android:name=".EventTypesManagement"
             android:exported="false" />
         <activity
-            android:name=".AccountManagement"
-            android:exported="false" />
-        <activity
-            android:name=".AdminEventTypes"
-            android:exported="false" />
-        <activity
-            android:name=".ViewEventTypes"
-            android:exported="false" />
-        <activity
-            android:name=".ViewEvents"
-            android:exported="false" />
-        <activity
-            android:name=".EventTypeCreation"
+            android:name=".ProfileView"
             android:exported="false" />
         <activity
             android:name=".EventCreation"
             android:exported="false" />
         <activity
-            android:name=".CyclingClubEvents"
+            android:name=".EventFeed"
             android:exported="false" />
         <activity
-            android:name=".RoadStageRace"
+            android:name=".AccountManagement"
             android:exported="false" />
         <activity
-            android:name=".RoadRace"
+            android:name=".EventTypesManagement"
             android:exported="false" />
         <activity
-            android:name=".HillClimb"
+            android:name=".EventManagement"
             android:exported="false" />
         <activity
-            android:name=".EventTypeSelector"
+            android:name=".EventCreation"
             android:exported="false" />
         <activity
-            android:name=".GroupRides"
-            android:exported="false" />
-        <activity
-            android:name=".AdminAccount"
-            android:exported="false" />
-        <activity
-            android:name=".admin"
+            android:name=".AccountRegistration"
             android:exported="false" />
         <activity
             android:name=".WelcomePage"
             android:exported="false" />
         <activity
-            android:name=".CyclingClubAccount"
-            android:exported="false" />
-        <activity
-            android:name=".ParticipantAccount"
-            android:exported="false"
-            android:theme="@style/Theme.Material3.Light.NoActionBar" />
-        <activity
             android:name=".AccountSelection"
-            android:exported="false" />
-        <activity
-            android:name=".register"
             android:exported="false" />
         <activity
             android:name=".Login"
@@ -81,13 +53,17 @@
             android:theme="@style/Theme.Material3.Light.NoActionBar" />
         <activity
             android:name=".MainActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

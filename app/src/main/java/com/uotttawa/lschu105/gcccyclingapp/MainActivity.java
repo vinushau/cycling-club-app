@@ -3,7 +3,9 @@ package com.uotttawa.lschu105.gcccyclingapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,18 +25,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mAuth = FirebaseAuth.getInstance();
     }
-    @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            Intent intent = new Intent(getApplicationContext(), Login.class);
+        // Check if the user is already logged in using SharedPreferences
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        String savedEmail = preferences.getString("email", "");
+
+        if (!TextUtils.isEmpty(savedEmail)) {
+            Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
             startActivity(intent);
             finish();
         }
     }
+
 
 
     public void onLoginButton(View view) {

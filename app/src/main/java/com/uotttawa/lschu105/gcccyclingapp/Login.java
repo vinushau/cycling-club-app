@@ -1,9 +1,9 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -12,31 +12,32 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import androidx.appcompat.app.AppCompatActivity;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class Login extends AppCompatActivity {
 
     EditText editTextEmail, editTextPassword;
     Button buttonLogin;
-    FirebaseAuth mAuth;
-    ProgressBar progressBar;
-    TextView textView;
+    TextView onLogin;
+    private boolean isPasswordVisible = false;
 
-    // Admin credentials
-    private static final String ADMIN_EMAIL = "admin";
-    private static final String ADMIN_PASSWORD = "admin";
+    ProgressBar progressBar;
 
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
+        // Check if the user is already logged in using SharedPreferences
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        String savedEmail = preferences.getString("email", "");
+
+        if (!TextUtils.isEmpty(savedEmail)) {
+            // User is already logged in, proceed to WelcomePage
             Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
             startActivity(intent);
             finish();
@@ -48,74 +49,104 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
         editTextEmail = findViewById(R.id.emailField);
         editTextPassword = findViewById(R.id.passwordField);
-        buttonLogin = findViewById(R.id.login_btn);
+        buttonLogin = findViewById(R.id.registerButton);
+        onLogin = findViewById(R.id.registerNow);
         progressBar = findViewById(R.id.progressBar);
-        textView = findViewById(R.id.registerNow);
-        textView.setOnClickListener(view -> {
+        onLogin.setOnClickListener(view -> {
             Intent intent = new Intent(getApplicationContext(), AccountSelection.class);
             startActivity(intent);
             finish();
         });
-
         buttonLogin.setOnClickListener(view -> {
             progressBar.setVisibility(View.VISIBLE);
             String email, password;
-            email = String.valueOf(editTextEmail.getText());
-            password = String.valueOf(editTextPassword.getText().toString());
+            email = String.valueOf(editTextEmail.getText()).replace(".","_dot_");
+            password = (editTextPassword.getText().toString());
 
-            if (TextUtils.isEmpty(email)) {
-                Toast.makeText(Login.this, "Enter email", Toast.LENGTH_SHORT).show();
+            if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+                Toast.makeText(Login.this, "Enter email and password", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (TextUtils.isEmpty(password)) {
-                Toast.makeText(Login.this, "Enter password", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference accountsReference = database.child("Accounts");
 
-            if (email.equals("admin") && password.equals("admin")) {
-                // Admin login
-                signInAdmin();
-            } else {
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.GONE);
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_SHORT).show();
-                                    Intent userIntent = new Intent(getApplicationContext(), WelcomePage.class);
-                                    startActivity(userIntent);
-                                    finish();
-                                } else {
-                                    Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                                }
+            accountsReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot accountsSnapshot) {
+                    boolean userFound = false;
+
+                    for (DataSnapshot userSnapshot : accountsSnapshot.getChildren()) {
+                        String storedEmail = userSnapshot.child("email").getValue(String.class);
+
+                        if (email.equals(storedEmail)) {
+                            userFound = true;
+                            String storedUsername = userSnapshot.child("username").getValue(String.class);
+                            String storedPassword = userSnapshot.child("password").getValue(String.class);
+                            String storedRole = userSnapshot.child("role").getValue(String.class);
+                            if (password.equals(storedPassword)) {
+                                Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_SHORT).show();
+
+                                // Save login information for automatic login to SharedPreferences
+                                SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = preferences.edit();
+                                editor.putString("email", storedEmail);
+                                editor.putString("username", storedUsername);
+                                editor.putString("password", storedPassword);
+                                editor.putString("role", storedRole);
+
+                                editor.apply();
+
+                                Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Incorrect password", Toast.LENGTH_SHORT).show();
                             }
-                        });
-            }
+
+                            break;
+                        }
+                    }
+
+                    if (!userFound) {
+                        Toast.makeText(getApplicationContext(), "User not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    progressBar.setVisibility(View.GONE);
+                    System.err.println("Error: " + databaseError.getMessage());
+                }
+            });
         });
     }
 
+    public void togglePasswordVisibility(View view) {
+        EditText passwordField = findViewById(R.id.passwordField);
 
-    private void signInAdmin() {
-        mAuth.signInWithEmailAndPassword("admin@gmail.com", "asdasdasd123")
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        progressBar.setVisibility(View.GONE);
-                        if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Admin Login Successful", Toast.LENGTH_SHORT).show();
-                            Intent adminIntent = new Intent(getApplicationContext(), WelcomePage.class);
-                            startActivity(adminIntent);
-                            finish();
-                        } else {
-                            Toast.makeText(Login.this, "Admin Authentication failed.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        isPasswordVisible = !isPasswordVisible;
+
+        if (isPasswordVisible) {
+            passwordField.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        } else {
+            passwordField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        }
+
+        passwordField.setSelection(passwordField.getText().length());
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
+    public void onClickBackButton(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }

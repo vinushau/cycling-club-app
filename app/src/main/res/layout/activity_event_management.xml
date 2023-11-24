@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#AF3939"
     android:backgroundTint="#ffffff"
-    tools:context=".EventCreation">
+    tools:context=".EventManagement">
 
     <ImageView
         android:id="@+id/imageView"
@@ -40,5 +40,13 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/imageView"
+        android:padding="16dp"
+        android:scrollbars="vertical" />
 
 </RelativeLayout>

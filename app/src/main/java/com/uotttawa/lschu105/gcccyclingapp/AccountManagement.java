@@ -13,15 +13,12 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,11 +34,10 @@ public class AccountManagement extends AppCompatActivity {
 
         listViewUsers = findViewById(R.id.listViewUsers);
 
-        databaseUsers = FirebaseDatabase.getInstance().getReference("Users");
+        databaseUsers = FirebaseDatabase.getInstance().getReference("Accounts");
 
         users = new ArrayList<>();
 
-        // Long click listener to show a dialog for updating or deleting a user
         listViewUsers.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -86,7 +82,6 @@ public class AccountManagement extends AppCompatActivity {
         final AlertDialog b = dialogBuilder.create();
         b.show();
 
-        // OnClickListener for the delete button in the dialog
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -96,23 +91,23 @@ public class AccountManagement extends AppCompatActivity {
         });
     }
 
-    // Method to delete user data from Firebase Realtime Database
     private void deleteUserData(final String userName) {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users");
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Accounts").child(userName);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    String user = userSnapshot.getKey();
-                    if (user != null && user.equals(userName)) {
-                        String userUID = userSnapshot.child("UID").getValue(String.class);
-                        userSnapshot.getRef().removeValue();
-                        deleteFirebaseAccount(userUID);
-                        Toast.makeText(getApplicationContext(), "User Deleted", Toast.LENGTH_LONG).show();
-                        return;
-                    }
+                if (dataSnapshot.exists()) {
+                    // Delete events associated with the user
+                    deleteEventsForUser(userName);
+
+                    // Delete the user
+                    dataSnapshot.getRef().removeValue();
+
+                    Toast.makeText(getApplicationContext(), "User and associated events deleted", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "User Not Found", Toast.LENGTH_LONG).show();
                 }
-                Toast.makeText(getApplicationContext(), "User Not Found", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -121,21 +116,30 @@ public class AccountManagement extends AppCompatActivity {
         });
     }
 
-    private void deleteFirebaseAccount(String userUID) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            user.delete()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Firebase Account Deleted", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Failed to Delete Firebase Account", Toast.LENGTH_LONG).show();
-                        }
-                    });
-        }
+    private void deleteEventsForUser(final String userName) {
+        DatabaseReference userEventsRef = FirebaseDatabase.getInstance().getReference().child("Accounts").child(userName).child("Events");
+
+        userEventsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
+                    // Get the name of the event owned by the user
+                    String eventName = eventSnapshot.getKey();
+
+                    // Delete the main event node in "Events"
+                    DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference().child("Events").child(eventName);
+                    eventsRef.removeValue();
+
+                    Toast.makeText(getApplicationContext(), "Event '" + eventName + "' deleted", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
     }
 
-    // Handle back button press to navigate to the WelcomePage
     public void onBackPressed() {
         Intent intent = new Intent(this, WelcomePage.class);
         startActivity(intent);

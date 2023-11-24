@@ -1,140 +1,187 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
 
 public class WelcomePage extends AppCompatActivity {
 
-    private FirebaseAuth auth;
-    private Button button;
-    private TextView textView;
+    private ImageButton roundButton;
+
     private Button createEventsButton;
     private Button viewEventsButton;
     private Button editEventTypesButton;
     private Button editUsersButton;
+    private TextView textView;
+    private TextView userName;
+    private TextView Welcome;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_page);
 
-        auth = FirebaseAuth.getInstance();
-        button = findViewById(R.id.logout);
-        textView = findViewById(R.id.user_details);
-        createEventsButton = findViewById(R.id.createEventsButton);
-        viewEventsButton = findViewById(R.id.viewEventsButton);
-        editEventTypesButton = findViewById(R.id.editEventTypesButton);
-        editUsersButton = findViewById(R.id.editUsers);
+        // Your existing code
+        roundButton = findViewById(R.id.roundButton);
+        createEventsButton = findViewById(R.id.button1);
+        viewEventsButton = findViewById(R.id.button2);
+        editEventTypesButton = findViewById(R.id.button3);
+        editUsersButton = findViewById(R.id.button4);
+        userName = findViewById(R.id.userName);
+        TextView cardTitleBold = findViewById(R.id.cardTitleBold);
+        TextView cardSubtitle = findViewById(R.id.cardSubtitle);
 
-        FirebaseUser user = auth.getCurrentUser();
+        // Initialize views
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.navigation_view);
 
-        if (user == null) {
-            Intent intent = new Intent(getApplicationContext(), Login.class);
-            startActivity(intent);
-            finish();
-        } else {
-            String username = user.getDisplayName();
-            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        // Set up navigation drawer
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_logout) {
+                    SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.clear();
+                    editor.apply();
 
-            if (username != null && !username.isEmpty()) {
-                DatabaseReference accountTypeReference = database.child("Users").child(username).child("accounttype");
-
-                accountTypeReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String accountTypeValue = dataSnapshot.getValue(String.class);
-
-                        if (accountTypeValue != null) {
-                            textView.setText("Welcome " + username + ". You are logged in as a " + accountTypeValue.toLowerCase() + " account.");
-
-                            createEventsButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(getApplicationContext(), EventTypeSelector.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            });
-
-                            viewEventsButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    // Start the activity for viewing events (replace with the correct activity)
-                                    Intent intent = new Intent(getApplicationContext(), ViewEvents.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            });
-
-                            if (accountTypeValue.equalsIgnoreCase("admin")) {
-                                createEventsButton.setVisibility(View.VISIBLE);
-                                viewEventsButton.setVisibility(View.VISIBLE);
-                                editEventTypesButton.setVisibility(View.VISIBLE);
-                                editUsersButton.setVisibility(View.VISIBLE);
-
-                                editEventTypesButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        // Start the activity for editing event types (replace with the correct activity)
-                                        Intent intent = new Intent(getApplicationContext(), AdminEventTypes.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                });
-
-                                editUsersButton.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        // Start the activity for editing users (replace with the correct activity)
-                                        Intent intent = new Intent(getApplicationContext(), AccountManagement.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                });
-                            } else if (accountTypeValue.equalsIgnoreCase("cycling club")) {
-                                // For Cycling Club accounts
-                                createEventsButton.setVisibility(View.VISIBLE);
-                                viewEventsButton.setVisibility(View.VISIBLE);
-                                editEventTypesButton.setVisibility(View.GONE); // Hide for non-admin users
-                                editUsersButton.setVisibility(View.GONE); // Hide for non-admin users
-                            } else {
-                                // For other account types
-                                createEventsButton.setVisibility(View.GONE);
-                                viewEventsButton.setVisibility(View.GONE);
-                                editEventTypesButton.setVisibility(View.GONE);
-                                editUsersButton.setVisibility(View.GONE);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("Error: " + databaseError.getMessage());
-                    }
-                });
+                    // Redirect to login
+                    Intent intent = new Intent(getApplicationContext(), Login.class);
+                    startActivity(intent);
+                    finish();
+                } else if (itemId == R.id.nav_profile) {
+                    Intent intent = new Intent(getApplicationContext(), ProfileView.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(WelcomePage.this,"Not implemented",Toast.LENGTH_SHORT);
+                }
+                drawerLayout.closeDrawer(GravityCompat.END);
+                return true;
             }
-        }
+        });
 
-        button.setOnClickListener(new View.OnClickListener() {
+        // Set up click listener for the menu button
+        ImageButton menuButton = findViewById(R.id.menuButton);
+        menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(getApplicationContext(), Login.class);
+                drawerLayout.openDrawer(GravityCompat.END);
+            }
+        });
+
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        String savedUsername = preferences.getString("username", "");
+        String savedRole = preferences.getString("role", "");
+        userName.setText(savedUsername);
+        // Update text based on user role
+        switch (savedRole) {
+            case "Admin":
+                cardTitleBold.setText("Create new Event");
+                cardSubtitle.setText("Admin Card Subtitle");
+                break;
+            case "CyclingClub":
+                cardTitleBold.setText("Create new Event");
+                cardSubtitle.setText("Cycling Club Card Subtitle");
+                break;
+            case "Participant":
+                cardTitleBold.setText("Join an Event");
+                cardSubtitle.setText("Participant Card Subtitle");
+                break;
+        }
+        updateButtonVisibility(savedRole);
+        Welcome = findViewById(R.id.userName);
+        Welcome.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), ProfileView.class);
+            startActivity(intent);
+            finish();
+        });
+
+    }
+    public void onNear(View view){
+        Intent intent = new Intent(getApplicationContext(), EventFeed.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void updateButtonVisibility(String userRole) {
+        createEventsButton.setVisibility(View.INVISIBLE);
+        viewEventsButton.setVisibility(View.INVISIBLE);
+        editEventTypesButton.setVisibility(View.INVISIBLE);
+        editUsersButton.setVisibility(View.INVISIBLE);
+        createEventsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), EventCreation.class);
                 startActivity(intent);
                 finish();
             }
         });
+        roundButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), EventCreation.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        viewEventsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Start the activity for viewing events (replace with the correct activity)
+                Intent intent = new Intent(getApplicationContext(), EventManagement.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        editEventTypesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Start the activity for editing event types (replace with the correct activity)
+                Intent intent = new Intent(getApplicationContext(), EventTypesManagement.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        editUsersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Start the activity for editing users (replace with the correct activity)
+                Intent intent = new Intent(getApplicationContext(), AccountManagement.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        // Update visibility based on user role
+        switch (userRole) {
+            case "Admin":
+                createEventsButton.setVisibility(View.VISIBLE);
+                viewEventsButton.setVisibility(View.VISIBLE);
+                editEventTypesButton.setVisibility(View.VISIBLE);
+                editUsersButton.setVisibility(View.VISIBLE);
+                break;
+            case "CyclingClub":
+                createEventsButton.setVisibility(View.VISIBLE);
+                viewEventsButton.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 }

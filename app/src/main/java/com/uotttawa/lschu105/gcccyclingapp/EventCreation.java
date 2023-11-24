@@ -1,69 +1,179 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import java.util.ArrayList;
+import java.util.List;
+import android.content.SharedPreferences;
+import android.widget.EditText;
 import android.widget.Space;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EventCreation extends AppCompatActivity {
+    private TextView selectedNumberDisplay;
+    private TextView selectedNumberDisplayMonth;
+    private TextView selectedNumberDisplayYear;
 
-    private EditText eventNameField;
-    private Spinner levelSpinner;
-    private TextView eventTypes, eventDescription;
-    private DatabaseReference databaseReference;
-    private LinearLayout linearLayout;
+    private RelativeLayout numberPickerContainer;
+    private RelativeLayout numberPickerContainerMonth;
+    private RelativeLayout numberPickerContainerYear;
 
+    private NumberPicker numberPicker;
+    private NumberPicker numberPickerMonth;
+    private NumberPicker numberPickerYear;
+    private RelativeLayout container;
+
+    private List<Event> eventTypes;
+    private boolean isValidationSuccessful = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creation);
+        eventTypes = new ArrayList<>();
 
-        Intent intent = getIntent();
-        String buttonName = intent.getStringExtra("eventType");
+        loadEventTypesFromFirebase();
+    }
 
-        eventTypes = findViewById(R.id.EventType);
-        eventDescription = findViewById(R.id.EventDescription);
-
-        DatabaseReference eventTypeReference = FirebaseDatabase.getInstance().getReference("EventTypes").child(buttonName);
-
-        eventTypeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void loadEventTypesFromFirebase() {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("EventTypes");
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String groupName = dataSnapshot.child("name").getValue(String.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
-                    eventDescription.setText(description);
-                    eventTypes.setText(groupName);
-                    createEditTextFields(dataSnapshot.child("Requirements"));
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                eventTypes.clear(); // Clear existing event types
+                LinearLayout containerLayout = findViewById(R.id.eventContainer);
+
+                for (DataSnapshot eventTypeSnapshot : dataSnapshot.getChildren()) {
+                    Event eventType = eventTypeSnapshot.getValue(Event.class);
+                    System.out.println("1" + eventType.getRequirementsList());
+
+                    if (eventType != null) {
+                        eventTypes.add(eventType);
+
+                        View cardView = LayoutInflater.from(EventCreation.this).inflate(R.layout.item_event_types, null);
+
+                        TextView eventTypeNameTextView = cardView.findViewById(R.id.TitleName);
+                        eventTypeNameTextView.setText(eventType.getName());
+
+                        Button roundButton = cardView.findViewById(R.id.roundButton);
+                        roundButton.setText("Choose");
+                        roundButton.setBackgroundColor(Color.parseColor("#7169E4"));
+                        roundButton.setText("Create");
+                        roundButton.setTextColor(Color.WHITE);
+                        roundButton.setOnClickListener(v -> showDialog(eventType));
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        int marginInDp = 16;
+                        int marginInPixels = (int) (marginInDp * getResources().getDisplayMetrics().density);
+                        layoutParams.setMargins(0, 0, 0, marginInPixels);
+                        cardView.setLayoutParams(layoutParams);
+                        containerLayout.addView(cardView);
+                    }
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle onCancelled event
             }
         });
+    }
 
-        eventNameField = findViewById(R.id.eventNameField);
-        levelSpinner = findViewById(R.id.levelSpinner);
-        linearLayout = findViewById(R.id.linearLayout);
+    private void showDialog(Event eventType) {
+        // Create a dialog to display event type details
+        Dialog dialog = new Dialog(EventCreation.this);
+        dialog.setContentView(R.layout.event_creation_dialog);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Events");
+        // Set dialog title
+        TextView dialogTitle = dialog.findViewById(R.id.dialogTitle);
+        dialogTitle.setText(eventType.getName());
+
+        // Create text field
+        createTextField(dialog, eventType.getDescription());
+
+        // Set up dialog button
+        Button dialogButton = dialog.findViewById(R.id.dialogButton);
+        dialogButton.setText("Create");
+        dialogButton.setBackgroundColor(Color.parseColor("#7169E4"));
+        dialogButton.setTextColor(Color.WHITE);
+
+        // Set dialog dimensions
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(dialog.getWindow().getAttributes());
+
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int dialogWidth = (int) (displayMetrics.widthPixels * 0.8f);
+        int dialogHeight = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        layoutParams.width = dialogWidth;
+        layoutParams.height = dialogHeight;
+
+        // Add dim overlay to the window
+        WindowManager.LayoutParams dimLayoutParams = new WindowManager.LayoutParams();
+        dimLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        dimLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        dimLayoutParams.format = PixelFormat.TRANSLUCENT;
+
+        WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        View dimOverlay = new View(EventCreation.this);
+        dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
+        windowManager.addView(dimOverlay, dimLayoutParams);
+
+        dialog.getWindow().setAttributes(layoutParams);
+
+        // Set dismiss listeners and touch behavior
+        dialogButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+
+        dimOverlay.setOnClickListener(v -> {
+            dialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setOnDismissListener(dialogInterface -> windowManager.removeView(dimOverlay));
+
+        dialog.show();
+
+        // Retrieve event type details from Firebase
+        String buttonName = eventType.getName().replace(" ", "");
+        DatabaseReference eventTypeReference = FirebaseDatabase.getInstance().getReference("EventTypes").child(buttonName);
         String[] levelOptions = {"Difficulty Level", "Beginner", "Intermediate", "Advanced", "All"};
+        AdapterView levelSpinner = dialog.findViewById(R.id.levelSpinner);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, levelOptions) {
+        // Set up level spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter(EventCreation.this, android.R.layout.simple_spinner_item, levelOptions) {
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
@@ -77,17 +187,256 @@ public class EventCreation extends AppCompatActivity {
         levelSpinner.setAdapter(adapter);
         levelSpinner.setSelection(0);
 
-        Button selectButton = findViewById(R.id.selectGroupRides);
-        selectButton.setOnClickListener(v -> createEvent(buttonName));
+        eventTypeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String groupName = dataSnapshot.child("name").getValue(String.class);
+                    String description = dataSnapshot.child("description").getValue(String.class);
+                    createEditTextFields(dialog, dataSnapshot.child("requirementsList"));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
+        // Handle button click
+        dialogButton.setOnClickListener(v -> {
+            // Validate the text fields
+            TextFieldValidation(dialog);
+
+            // Check if validation is successful
+            if (isValidationSuccessful && createEvent(buttonName, dialog)) {
+                dialog.dismiss();
+            } else {
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Set up number pickers and their containers
+        selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
+        selectedNumberDisplayMonth = dialog.findViewById(R.id.selectedNumberDisplayMonth);
+        selectedNumberDisplayYear = dialog.findViewById(R.id.selectedNumberDisplayYear);
+        numberPickerContainer = dialog.findViewById(R.id.numberPickerContainer);
+        numberPickerContainerMonth = dialog.findViewById(R.id.numberPickerContainerMonth);
+        numberPickerContainerYear = dialog.findViewById(R.id.numberPickerContainerYear);
+        numberPicker = dialog.findViewById(R.id.numberPicker);
+        numberPickerMonth = dialog.findViewById(R.id.numberPickerMonth);
+        numberPickerYear = dialog.findViewById(R.id.numberPickerYear);
+        container = dialog.findViewById(R.id.containerMonth);
+
+        // Set up the NumberPicker
+        setupNumberPicker();
+        setupNumberPickerMonth();
+        setupNumberPickerYear();
+
+        // Set click listeners for number picker containers
+        numberPickerContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleNumberPickerVisibility();
+            }
+        });
+
+        numberPickerContainerMonth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleNumberPickerVisibilityMonth();
+            }
+        });
+
+        container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleNumberPickerVisibilityMonth();
+            }
+        });
+
+        numberPickerContainerYear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleNumberPickerVisibilityYear();
+            }
+        });
     }
 
-    private void createEditTextFields(DataSnapshot requirementsSnapshot) {
+    private void toggleNumberPickerVisibilityMonth() {
+        if (container.getVisibility() == View.VISIBLE) {
+            container.setVisibility(View.GONE);
+            selectedNumberDisplayMonth.setVisibility(View.VISIBLE);
+        } else {
+            container.setVisibility(View.VISIBLE);
+            selectedNumberDisplayMonth.setVisibility(View.GONE);
+            numberPickerYear.setVisibility(View.GONE);
+            selectedNumberDisplayYear.setVisibility(View.VISIBLE);
+            numberPicker.setVisibility(View.GONE);
+            selectedNumberDisplay.setVisibility(View.VISIBLE);
+
+        }
+    }
+    private void toggleNumberPickerVisibilityYear() {
+        if (numberPickerYear.getVisibility() == View.VISIBLE) {
+            numberPickerYear.setVisibility(View.GONE);
+            selectedNumberDisplayYear.setVisibility(View.VISIBLE);
+        } else {
+            container.setVisibility(View.GONE);
+            selectedNumberDisplayMonth.setVisibility(View.VISIBLE);
+            numberPicker.setVisibility(View.GONE);
+            selectedNumberDisplay.setVisibility(View.VISIBLE);
+            numberPickerYear.setVisibility(View.VISIBLE);
+            selectedNumberDisplayYear.setVisibility(View.GONE);
+        }
+    }
+    private void setupNumberPickerYear() {
+        // Set the range of values for the NumberPicker (1 to 31)
+        numberPickerYear.setMinValue(2023);
+        numberPickerYear.setMaxValue(2100);
+
+        // Set the initial value (day of the month)
+        numberPickerYear.setValue(2023);
+
+        // Set a listener for when the value changes
+        numberPickerYear.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                // Update the displayed number when the value changes
+                selectedNumberDisplayYear.setText(String.valueOf(newVal));
+            }
+        });
+
+
+    }
+
+    private void setupNumberPickerMonth() {
+        numberPickerMonth.setMinValue(1);
+        numberPickerMonth.setMaxValue(12);
+        numberPickerMonth.setValue(1);
+
+        numberPickerMonth.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                selectedNumberDisplayMonth.setText(String.valueOf(newVal));
+            }
+        });
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+        startActivity(intent);
+        finish();
+    }
+    private boolean createEvent(String buttonName, Dialog dialog) {
+        TextFieldValidation(dialog);
+
+        if (!isValidationSuccessful) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        EditText eventNameEditText = dialog.findViewById(R.id.nameField);
+        String eventNameField = eventNameEditText.getText().toString();
+
+        Spinner levelSpinner = dialog.findViewById(R.id.levelSpinner);
+        String selectedLevel = levelSpinner.getSelectedItem().toString();
+
+        String eventName = eventNameField;
+        System.out.println("Event name" + eventName);
+        String difficultyLevel = selectedLevel;
+        Map<String, String> requirementsMap = getRequirements(dialog);
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
+        String savedUsername = preferences.getString("username", "");
+        int selectedDay = numberPicker.getValue();
+        int selectedMonth = numberPickerMonth.getValue();
+        int selectedYear = numberPickerYear.getValue();
+        Event eventObject = new Event(savedUsername, difficultyLevel, buttonName, eventName, requirementsMap, selectedDay,selectedMonth,selectedYear);
+        System.out.println(eventObject);
+
+        // Add the EventObject to Firebase
+        return createFirebaseEntry(eventObject, eventName);
+    }
+
+    private void setupNumberPicker() {
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(31);
+        numberPicker.setValue(1);
+
+        numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                selectedNumberDisplay.setText(String.valueOf(newVal));
+            }
+        });
+    }
+
+    private void toggleNumberPickerVisibility() {
+        if (numberPicker.getVisibility() == View.VISIBLE) {
+            numberPicker.setVisibility(View.GONE);
+            selectedNumberDisplay.setVisibility(View.VISIBLE);
+        } else {
+            container.setVisibility(View.GONE);
+            selectedNumberDisplayMonth.setVisibility(View.VISIBLE);
+            numberPicker.setVisibility(View.VISIBLE);
+            selectedNumberDisplay.setVisibility(View.GONE);
+            numberPickerYear.setVisibility(View.GONE);
+            selectedNumberDisplayYear.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+
+    private boolean createFirebaseEntry(Event eventObject, String eventName) {
+        DatabaseReference eventsReference = FirebaseDatabase.getInstance().getReference("Events");
+
+        boolean success = true;
+
+        DatabaseReference eventReference = eventsReference.child(eventName);
+        DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Accounts")
+                .child(eventObject.getCreatedBy()).child("Events").child(eventName);
+
+        try {
+            eventReference.setValue(eventObject);
+            userEventsReference.setValue(eventName);
+        } catch (Exception e) {
+            success = false;
+        }
+
+        return success;
+    }
+    private Map<String, String> getRequirements(Dialog dialog) {
+        LinearLayout linear = dialog.findViewById(R.id.LinearLayout);
+        Map<String, String> requirementsMap = new HashMap<>();
+
+        for (int i = 0; i < linear.getChildCount(); i++) {
+            View childView = linear.getChildAt(i);
+
+            if (childView instanceof EditText) {
+                EditText editText = (EditText) childView;
+                if (!editText.getHint().toString().toLowerCase().equals("name")) {
+                    System.out.println(editText.getHint().toString().toLowerCase());
+                    String requirementKey = editText.getHint().toString().toLowerCase();
+                    String requirementValue = editText.getText().toString();
+                    requirementsMap.put(requirementKey, requirementValue);
+                }
+            }
+        }
+        System.out.println(requirementsMap);
+        return requirementsMap;
+    }
+
+    private void createEditTextFields(Dialog dialog, DataSnapshot requirementsSnapshot) {
         int editTextWidthSP = 300;
         int spaceHeightPixels = 25;
 
-        int editTextWidthPixels = (int) (editTextWidthSP * getResources().getDisplayMetrics().scaledDensity);
+        int editTextWidthPixels = (int) (editTextWidthSP * dialog.getContext().getResources().getDisplayMetrics().scaledDensity);
 
-        Space space = new Space(this);
+        LinearLayout linearLayout = dialog.findViewById(R.id.LinearLayout);
+
+        Space space = new Space(dialog.getContext());
         space.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 spaceHeightPixels));
@@ -97,89 +446,48 @@ public class EventCreation extends AppCompatActivity {
 
         for (DataSnapshot requirement : requirementsSnapshot.getChildren()) {
             String requirementValue = requirement.getValue(String.class);
-            EditText editText = new EditText(this);
+            EditText editText = new EditText(dialog.getContext());
             editText.setLayoutParams(new LinearLayout.LayoutParams(
                     editTextWidthPixels,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
             editText.setHint(requirementValue);
-            editText.setTextColor(getResources().getColor(R.color.black));
+            editText.setTextColor(dialog.getContext().getResources().getColor(R.color.black));
             editText.setTextSize(20);
-            editText.setGravity(Gravity.CENTER);
             linearLayout.addView(editText, index);
             index++;
         }
     }
 
-    private void createEvent(String buttonName) {
-        String eventName = eventNameField.getText().toString();
-        String difficultyLevel = levelSpinner.getSelectedItem().toString();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String username = user.getDisplayName();
+    private void TextFieldValidation(Dialog dialog) {
+        LinearLayout linear = dialog.findViewById(R.id.LinearLayout);
+        for (int i = 0; i < linear.getChildCount(); i++) {
+            View childView = linear.getChildAt(i);
 
-        if (!TextFieldValidation() || difficultyLevel.equals("Difficulty Level")) {
-            Toast.makeText(getApplicationContext(), "Please enter text in all fields and select a difficulty level", Toast.LENGTH_LONG).show();
-        } else {
-            DatabaseReference eventsReference = FirebaseDatabase.getInstance().getReference("Events");
-
-            eventsReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.hasChild(eventName)) {
-                        // Event with the same name already exists
-                        Toast.makeText(getApplicationContext(), "Event with this name already exists. Please choose a different name.", Toast.LENGTH_LONG).show();
-                    } else {
-                        // Event name is unique, proceed with creation
-                        DatabaseReference eventReference = eventsReference.child(eventName);
-                        eventReference.child("EventType").setValue(buttonName);
-
-                        for (int i = 0; i < linearLayout.getChildCount(); i++) {
-                            if (linearLayout.getChildAt(i) instanceof EditText) {
-                                EditText editText = (EditText) linearLayout.getChildAt(i);
-                                String requirementKey = editText.getHint().toString().toLowerCase();
-                                String requirementValue = editText.getText().toString();
-                                eventReference.child(requirementKey).setValue(requirementValue);
-                            }
-                        }
-
-                        eventReference.child("Difficulty Level").setValue(difficultyLevel);
-                        eventReference.child("CreatedBy").setValue(username);
-
-                        DatabaseReference userEventsReference = FirebaseDatabase.getInstance().getReference("Users").child(username).child("Events").child(eventName);
-                        userEventsReference.setValue(eventName);
-
-                        eventNameField.setText("");
-                        levelSpinner.setSelection(0);
-
-                        Toast.makeText(EventCreation.this, "Event created successfully", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    // Handle onCancelled event
-                }
-            });
-        }
-    }
-
-    public void onBack(View view) {
-        Intent intent = new Intent(getApplicationContext(), EventTypeSelector.class);
-        startActivity(intent);
-        finish();
-    }
-
-    private boolean TextFieldValidation() {
-        for (int i = 0; i < linearLayout.getChildCount(); i++) {
-            if (linearLayout.getChildAt(i) instanceof EditText) {
-                EditText editText = (EditText) linearLayout.getChildAt(i);
+            if (childView instanceof EditText) {
+                EditText editText = (EditText) childView;
                 if (editText.getText().toString().trim().isEmpty()) {
-                    return false;
+                    isValidationSuccessful = false;
+                    return;
                 }
             }
         }
-        return true;
+        isValidationSuccessful = true;
+    }
+    private void createTextField(Dialog dialog, String text) {
+        int editTextWidthSP = 300;
+
+        int editTextWidthPixels = (int) (editTextWidthSP * dialog.getContext().getResources().getDisplayMetrics().scaledDensity);
+
+        LinearLayout linearLayout = dialog.findViewById(R.id.LinearLayout);
+
+        TextView descriptionEditText = new TextView(dialog.getContext());
+        descriptionEditText.setLayoutParams(new LinearLayout.LayoutParams(
+                editTextWidthPixels,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        descriptionEditText.setText(text);
+        descriptionEditText.setTextColor(dialog.getContext().getResources().getColor(R.color.black));
+        descriptionEditText.setTextSize(16);
+        descriptionEditText.setEnabled(false);
+        linearLayout.addView(descriptionEditText,1);
     }
 }

@@ -1,0 +1,7 @@
+<!-- res/values/dimens.xml -->
+<resources>
+    <!-- Define elevation values -->
+    <dimen name="elevation_s">12dp</dimen>
+    <dimen name="elevation_m">24dp</dimen>
+    <dimen name="elevation_l">30dp</dimen>
+</resources>
