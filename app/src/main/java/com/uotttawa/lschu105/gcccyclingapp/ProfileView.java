@@ -101,14 +101,11 @@ public class ProfileView extends AppCompatActivity {
 
         storageReference.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> {
-                    // Image uploaded successfully, now get the download URL
                     storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                        // Save the image URL in the user's profile data in Firebase Realtime Database
                         saveImageUrlInDatabase(username, uri.toString());
                     });
                 })
                 .addOnFailureListener(exception -> {
-                    // Handle failed image upload
                     Toast.makeText(ProfileView.this, "Image upload failed", Toast.LENGTH_SHORT).show();
                 });
     }
