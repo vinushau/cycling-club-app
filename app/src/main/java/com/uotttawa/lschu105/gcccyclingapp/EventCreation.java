@@ -171,6 +171,7 @@ public class EventCreation extends AppCompatActivity {
         DatabaseReference eventTypeReference = FirebaseDatabase.getInstance().getReference("EventTypes").child(buttonName);
         String[] levelOptions = {"Difficulty Level", "Beginner", "Intermediate", "Advanced", "All"};
         AdapterView levelSpinner = dialog.findViewById(R.id.levelSpinner);
+        levelSpinner.setVisibility(View.VISIBLE);
 
         // Set up level spinner
         ArrayAdapter<String> adapter = new ArrayAdapter(EventCreation.this, android.R.layout.simple_spinner_item, levelOptions) {

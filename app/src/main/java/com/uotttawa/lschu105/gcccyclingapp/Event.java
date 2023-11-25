@@ -12,16 +12,16 @@ public class Event {
     private String eventName;
     private Map<String, String> requirements;
     private List<String> requirementsList;
-    private int day;
-    private int month;
-    private int year;
+    private Integer day;
+    private Integer month;
+    private Integer year;
 
     // Default constructor (needed for Firebase)
     public Event() {
     }
 
     // For testing quick sort
-    public Event(int day, int month, int year) {
+    public Event(Integer day, Integer month, Integer year) {
         this.day = day;
         this.month = month;
         this.year = year;
@@ -34,7 +34,7 @@ public class Event {
         this.requirementsList = Requirements;
     }
     //Constructor for creating events
-    public Event(String createdBy, String difficultyLevel, String eventType, String eventName, Map<String, String> requirements, int day, int month, int year) {
+    public Event(String createdBy, String difficultyLevel, String eventType, String eventName, Map<String, String> requirements, Integer day, Integer month, Integer year) {
         this.createdBy = createdBy;
         this.difficultyLevel = difficultyLevel;
         this.eventType = eventType;
@@ -110,25 +110,25 @@ public class Event {
         this.requirementsList = requirementsList;
     }
 
-    public int getDay() {
+    public Integer getDay() {
         return day;
     }
 
-    public void setDay(int day) {
+    public void setDay(Integer day) {
         this.day = day;
     }
-    public int getMonth() {
+    public Integer getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
+    public void setMonth(Integer month) {
         this.month = month;
     }
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(Integer year) {
         this.year = year;
     }
 
