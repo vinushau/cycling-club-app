@@ -38,13 +38,19 @@ public class ProfileView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
         events = new ArrayList<>();
+        TextView ProfileName = findViewById(R.id.ProfileName);
+        TextView ProfileUsername = findViewById(R.id.ProfileUsername);
+        TextView profile = findViewById(R.id.profile);
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("username");
+        ProfileName.setText(username);
+        ProfileUsername.setText("@" + username);
+        profile.setOnClickListener(v -> {
+            Intent Intent = new Intent(getApplicationContext(), WelcomePage.class);
+            startActivity(Intent);
+            finish();
+        });
         loadEventsFromFirebase();
-    }
-
-    //use this to call the event editor on each card
-    private void showEventDialog(Event event) {
-        EventEditor dialogHelper = new EventEditor();
-        dialogHelper.showDialog(ProfileView.this, this, event);
     }
 
     private void loadEventsFromFirebase() {
@@ -74,8 +80,9 @@ public class ProfileView extends AppCompatActivity {
                         View cardView = LayoutInflater.from(ProfileView.this).inflate(R.layout.event_card, null);
 
                         TextView eventNameTextView = cardView.findViewById(R.id.TitleName);
+                        TextView eventCreator = cardView.findViewById(R.id.EventCreator);
                         eventNameTextView.setText(event.getEventName());
-                        eventNameTextView.setText(event.getEventName());
+                        eventCreator.setText("Organised by: " + event.getCreatedBy());
 
                         int day = event.getDay();
                         int month = event.getMonth();
@@ -108,9 +115,12 @@ public class ProfileView extends AppCompatActivity {
                                 LinearLayout.LayoutParams.MATCH_PARENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT
                         );
-                        int marginInDp = 16;
+                        int marginInDp = 20;
                         int marginInPixels = (int) (marginInDp * getResources().getDisplayMetrics().density);
-                        layoutParams.setMargins(0, 0, 0, marginInPixels);
+                        int sidemarginInDp = 18;
+                        int sidemargininPixels = (int) (sidemarginInDp * getResources().getDisplayMetrics().density);
+
+                        layoutParams.setMargins(sidemargininPixels, 0, sidemargininPixels, marginInPixels);
                         cardView.setLayoutParams(layoutParams);
                         containerLayout.addView(cardView);
                     }
