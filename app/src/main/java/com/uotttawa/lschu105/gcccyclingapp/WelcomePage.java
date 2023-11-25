@@ -17,9 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 public class WelcomePage extends AppCompatActivity {
-
     private ImageButton roundButton;
-
     private Button createEventsButton;
     private Button viewEventsButton;
     private Button editEventTypesButton;
@@ -65,7 +63,11 @@ public class WelcomePage extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else if (itemId == R.id.nav_profile) {
+                    SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+                    String username = preferences.getString("username", "");
+                    System.out.println(username);
                     Intent intent = new Intent(getApplicationContext(), ProfileView.class);
+                    intent.putExtra("username", username);
                     startActivity(intent);
                     finish();
                 } else {
@@ -107,11 +109,12 @@ public class WelcomePage extends AppCompatActivity {
         updateButtonVisibility(savedRole);
         Welcome = findViewById(R.id.userName);
         Welcome.setOnClickListener(v -> {
+            String username = preferences.getString("username", "");
             Intent intent = new Intent(getApplicationContext(), ProfileView.class);
+            intent.putExtra("username", username);
             startActivity(intent);
             finish();
         });
-
     }
     public void onNear(View view){
         Intent intent = new Intent(getApplicationContext(), EventFeed.class);
