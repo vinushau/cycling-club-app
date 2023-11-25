@@ -14,4 +14,18 @@
         <item name="cornerSizeBottomRight">16dp</item>
         <item name="cornerFamilyBottomRight">rounded</item>
     </style>
+    <style name="CircularPicture">
+        <item name="cornerSizeTopLeft">50%</item>
+        <item name="cornerFamilyTopLeft">rounded</item>
+
+        <item name="cornerSizeTopRight">50%</item>
+        <item name="cornerFamilyTopRight">rounded</item>
+
+        <item name="cornerSizeBottomLeft">50%</item>
+        <item name="cornerFamilyBottomLeft">rounded</item>
+
+        <item name="cornerSizeBottomRight">50%</item>
+        <item name="cornerFamilyBottomRight">rounded</item>
+    </style>
+
 </resources>

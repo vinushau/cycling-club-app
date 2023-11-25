@@ -4,15 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.imageview.ShapeableImageView;
@@ -21,21 +25,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 import com.uotttawa.lschu105.gcccyclingapp.Utils.QuickSort;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import com.google.firebase.storage.FirebaseStorage;
 
 public class ProfileView extends AppCompatActivity {
     private TextView sortButton;
-    private ImageButton btnMoreSocialMedia;
-    private LinearLayout layoutAdditionalSocialMedia;
     private ArrayList<Event> events;
     private int ascending;
     private LinearLayout containerLayout;
-
+    private static final int PICK_IMAGE = 100;
+    private ShapeableImageView imageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,8 +61,95 @@ public class ProfileView extends AppCompatActivity {
             finish();
         });
         loadEventsFromFirebase();
+        loadProfilePicture(username);
         sortButton = findViewById(R.id.sortedBy);
         ascending = -1;
+
+        imageView = findViewById(R.id.profilepicture);
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGallery();
+            }
+        });
+    }
+
+    private void openGallery() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, PICK_IMAGE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
+            if (data != null) {
+                Uri imageUri = data.getData();
+                if (imageUri != null) {
+                    uploadImageToFirebaseStorage(imageUri);
+                }
+            }
+        }
+    }
+
+    private void uploadImageToFirebaseStorage(Uri imageUri) {
+        String username = getIntent().getStringExtra("username");
+        String imagePath = "profilePictures/" + username + ".jpg"; // Set your desired image path
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(imagePath);
+
+        storageReference.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    // Image uploaded successfully, now get the download URL
+                    storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                        // Save the image URL in the user's profile data in Firebase Realtime Database
+                        saveImageUrlInDatabase(username, uri.toString());
+                    });
+                })
+                .addOnFailureListener(exception -> {
+                    // Handle failed image upload
+                    Toast.makeText(ProfileView.this, "Image upload failed", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void saveImageUrlInDatabase(String username, String imageUrl) {
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference().child("Profile").child(username);
+
+        Map<String, Object> profileUpdates = new HashMap<>();
+        profileUpdates.put("picture", imageUrl);
+
+        userReference.updateChildren(profileUpdates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(ProfileView.this, "Image saved successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ProfileView.this, "Failed to save image URL in the database", Toast.LENGTH_SHORT).show();
+                });
+    }
+    private void loadProfilePicture(String username) {
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference().child("Profile").child(username);
+
+        userReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Retrieve the image URL from the database
+                    String imageUrl = dataSnapshot.child("picture").getValue(String.class);
+
+                    if (imageUrl != null) {
+                        Glide.with(ProfileView.this)
+                                .load(imageUrl)
+                                .into(imageView);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle onCancelled event
+            }
+        });
     }
 
     public void OnSortButton(View view) {

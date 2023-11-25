@@ -46,7 +46,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage")
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation ("com.google.android.material:material:1.5.0-alpha01")
-
-
 }

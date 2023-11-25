@@ -41,14 +41,15 @@
                     android:textColor="#FFFFFF"
                     android:textSize="20dp" />
 
-                <ImageView
-                    android:id="@+id/imageView2"
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profilepicture"
                     android:layout_width="85dp"
                     android:layout_height="85dp"
                     android:layout_centerHorizontal="false"
                     android:layout_centerVertical="false"
                     android:layout_gravity="center"
                     android:layout_marginTop="-5dp"
+                    app:shapeAppearanceOverlay="@style/CircularPicture"
                     app:srcCompat="@drawable/baseline_account_circle" />
 
                 <TextView
