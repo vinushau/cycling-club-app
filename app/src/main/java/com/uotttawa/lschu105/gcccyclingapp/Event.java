@@ -20,6 +20,13 @@ public class Event {
     public Event() {
     }
 
+    // For testing quick sort
+    public Event(int day, int month, int year) {
+        this.day = day;
+        this.month = month;
+        this.year = year;
+    }
+
     //Constructor for creating event types
     public Event(String description, String name, List<String> Requirements) {
         this.name = name;
@@ -123,5 +130,28 @@ public class Event {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public int compareTo(Event b) {
+        Event a = this;
+
+        // compares years
+        if (a.getYear() != b.getYear()) {
+            return Integer.compare(a.getYear(), b.getYear());
+        }
+
+        // compares months
+        if (a.getMonth() != b.getMonth()) {
+            return Integer.compare(a.getMonth(), b.getMonth());
+        }
+
+        // compares days
+        return Integer.compare(a.getDay(), b.getDay());
+    }
+
+    public String toString() {
+        String sDay = day > 10 ? Integer.toString(day) : "0" + Integer.toString(day);
+        String sMonth = month > 10 ? Integer.toString(month) : "0" + Integer.toString(month);
+        return String.format("%s/%s/%d", sDay, sMonth, year);
     }
 }
