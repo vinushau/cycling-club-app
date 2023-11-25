@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.uotttawa.lschu105.gcccyclingapp.Utils.QuickSort;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,19 +29,24 @@ import java.util.List;
 import java.util.Map;
 
 public class ProfileView extends AppCompatActivity {
-
+    private TextView sortButton;
     private ImageButton btnMoreSocialMedia;
     private LinearLayout layoutAdditionalSocialMedia;
-    private List<Event> events;
+    private ArrayList<Event> events;
+    private int ascending;
+    private LinearLayout containerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
+
         events = new ArrayList<>();
+
         TextView ProfileName = findViewById(R.id.ProfileName);
         TextView ProfileUsername = findViewById(R.id.ProfileUsername);
         TextView profile = findViewById(R.id.profile);
+
         Intent intent = getIntent();
         String username = intent.getStringExtra("username");
         ProfileName.setText(username);
@@ -51,6 +57,66 @@ public class ProfileView extends AppCompatActivity {
             finish();
         });
         loadEventsFromFirebase();
+        sortButton = findViewById(R.id.sortedBy);
+        ascending = -1;
+    }
+
+    public void OnSortButton(View view) {
+        QuickSort.printArray(events);
+        ascending*=-1;
+        QuickSort.sortEvents(events, ascending);
+        containerLayout.removeAllViews();
+        System.out.println("Sort button clicked");
+        QuickSort.printArray(events);
+
+        for (Event event: events) {
+            View cardView = LayoutInflater.from(ProfileView.this).inflate(R.layout.event_card, null);
+
+            TextView eventNameTextView = cardView.findViewById(R.id.TitleName);
+            TextView eventCreator = cardView.findViewById(R.id.EventCreator);
+            eventNameTextView.setText(event.getEventName());
+            eventCreator.setText("Organised by: " + event.getCreatedBy());
+
+            int day = event.getDay();
+            int month = event.getMonth();
+            int year = event.getYear();
+
+            String strDay = day > 10 ? Integer.toString(day) : "0" + Integer.toString(day);
+            String strMonth = month > 10 ? Integer.toString(month) : "0" + Integer.toString(month);
+
+            String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
+
+            TextView eventDateTextView = cardView.findViewById(R.id.EventDate);
+            eventDateTextView.setText(dateFormatted);
+
+            ShapeableImageView profilePicture = cardView.findViewById(R.id.ProfilePicture);
+            profilePicture.setOnClickListener(v -> {
+                Intent newIntent = new Intent(getApplicationContext(), ProfileView.class);
+                newIntent.putExtra("username", event.getCreatedBy());
+                startActivityForResult(newIntent, 0);
+            });
+
+            Button roundButton = cardView.findViewById(R.id.roundButton);
+            roundButton.setText("Edit");
+            roundButton.setTextColor(Color.WHITE);
+            roundButton.setOnClickListener(v -> {
+                EventEditor dialogHelper = new EventEditor();
+                dialogHelper.showDialog(ProfileView.this, ProfileView.this, event);
+            });
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            int marginInDp = 20;
+            int marginInPixels = (int) (marginInDp * getResources().getDisplayMetrics().density);
+            int sidemarginInDp = 18;
+            int sidemargininPixels = (int) (sidemarginInDp * getResources().getDisplayMetrics().density);
+
+            layoutParams.setMargins(sidemargininPixels, 0, sidemargininPixels, marginInPixels);
+            cardView.setLayoutParams(layoutParams);
+            containerLayout.addView(cardView);
+        }
     }
 
     private void loadEventsFromFirebase() {
@@ -62,7 +128,7 @@ public class ProfileView extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 events.clear(); // Clear existing events
-                LinearLayout containerLayout = findViewById(R.id.eventContainer);
+                containerLayout = findViewById(R.id.eventContainer);
 
                 // Remove all views from the container layout
                 containerLayout.removeAllViews();

@@ -248,6 +248,7 @@
                             android:layout_marginLeft="18dp"
                             android:layout_marginBottom="20dp"
                             android:fontFamily="@font/inter_semibold"
+                            android:onClick="OnSortButton"
                             android:text="Upcoming Events"
                             android:textSize="20sp" />
 
