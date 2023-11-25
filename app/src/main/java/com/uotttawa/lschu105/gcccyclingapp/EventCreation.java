@@ -227,6 +227,12 @@ public class EventCreation extends AppCompatActivity {
         numberPickerYear = dialog.findViewById(R.id.numberPickerYear);
         container = dialog.findViewById(R.id.containerMonth);
 
+        LinearLayout number = dialog.findViewById(R.id.number);
+        number.setVisibility(View.VISIBLE);
+        selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
+        selectedNumberDisplayMonth = dialog.findViewById(R.id.selectedNumberDisplayMonth);
+        selectedNumberDisplayYear = dialog.findViewById(R.id.selectedNumberDisplayYear);
+
         // Set up the NumberPicker
         setupNumberPicker();
         setupNumberPickerMonth();
