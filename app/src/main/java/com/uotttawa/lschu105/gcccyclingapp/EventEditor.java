@@ -50,14 +50,14 @@ public class EventEditor {
     private List<Event> events;
     private boolean isValidationSuccessful = false;
 
-    public void showDialog(Activity activity, Context context, Event event) {
+    public void showDialog(Activity activity, Context context, Event event, String redirectUsername) {
         SharedPreferences preferences = activity.getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
         String userRole = preferences.getString("role", "");
 
         //Only allows Admins and Cycling Clubs accounts to use the event editor dialogue
         if ("Admin".equals(userRole) || "CyclingClub".equals(userRole)){
 
-        } else{
+        } else {
             SharedPreferences.Editor editor = preferences.edit();
             editor.clear();
             editor.apply();
@@ -65,7 +65,6 @@ public class EventEditor {
             Intent intent = new Intent(activity, Login.class);
             activity.startActivity(intent);
             activity.finish();
-
         }
 
         Dialog dialog = new Dialog(context);
@@ -79,8 +78,8 @@ public class EventEditor {
 
         Button dialogButton = dialog.findViewById(R.id.dialogButton);
         dialogButton.setText("Delete");
-        dialogButton.setBackgroundColor(Color.parseColor("#DB4D4D")); // Set the background color to red                        roundButton.setText("Delete"); // Set the text to "Delete"
-        dialogButton.setTextColor(Color.WHITE); // Set text color to white
+        dialogButton.setBackgroundColor(Color.parseColor("#DB4D4D"));
+        dialogButton.setTextColor(Color.WHITE);
         LinearLayout numberpicker = dialog.findViewById(R.id.number);
         numberpicker.setVisibility(View.VISIBLE);
         EditText TitleField = dialog.findViewById(R.id.nameField);
@@ -89,7 +88,7 @@ public class EventEditor {
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         layoutParams.copyFrom(dialog.getWindow().getAttributes());
 
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics(); // Use the activity's resources
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         int dialogWidth = (int) (displayMetrics.widthPixels * 0.8f);
         int dialogHeight = WindowManager.LayoutParams.WRAP_CONTENT;
 
@@ -102,7 +101,7 @@ public class EventEditor {
         dimLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
         dimLayoutParams.format = PixelFormat.TRANSLUCENT;
 
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE); // Use the activity's system service
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         View dimOverlay = new View(context);
         dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
         windowManager.addView(dimOverlay, dimLayoutParams);
@@ -115,7 +114,8 @@ public class EventEditor {
             dialog.dismiss();
             windowManager.removeView(dimOverlay);
             Intent intent = new Intent(activity, activity.getClass());
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Add this line to clear the activity stack
+            intent.putExtra("username", redirectUsername);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             activity.startActivity(intent);
             activity.finish();
         });
@@ -132,7 +132,8 @@ public class EventEditor {
                 dialog.dismiss();
                 windowManager.removeView(dimOverlay);
                 Intent intent = new Intent(activity, activity.getClass());
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Add this line to clear the activity stack
+                intent.putExtra("username", redirectUsername);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 activity.startActivity(intent);
                 activity.finish();
             } else {
@@ -140,7 +141,14 @@ public class EventEditor {
             }
         });
         dialog.setCanceledOnTouchOutside(true);
-        dialog.setOnDismissListener(dialogInterface -> windowManager.removeView(dimOverlay));
+        dialog.setOnDismissListener(dialogInterface -> {
+            windowManager.removeView(dimOverlay);
+            Intent intent = new Intent(activity, activity.getClass());
+            intent.putExtra("username", redirectUsername);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            activity.startActivity(intent);
+            activity.finish();
+        });
 
         dialog.show();
 
@@ -161,7 +169,6 @@ public class EventEditor {
         levelSpinner.setAdapter(adapter);
         int difficultyLevelIndex = getDifficultyLevelIndex(event.getDifficultyLevel(), levelOptions);
         levelSpinner.setSelection(difficultyLevelIndex);
-
 
         selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
         String day = String.valueOf(event.getDay());
@@ -188,34 +195,34 @@ public class EventEditor {
         numberPickerMonth.setValue(event.getMonth());
         numberPickerYear.setValue(event.getYear());
         numberPickerContainer.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-                System.out.println(numberPicker.getValue());
                 toggleNumberPickerVisibility();
             }
         });
+
         numberPickerContainerMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println(numberPickerMonth.getValue());
                 toggleNumberPickerVisibilityMonth();
             }
         });
+
         container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggleNumberPickerVisibilityMonth();
             }
         });
+
         numberPickerContainerYear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggleNumberPickerVisibilityYear();
             }
         });
-    }
 
+    }
     private void createTextField(Dialog dialog, String text) {
         int editTextWidthSP = 300;
         int editTextWidthPixels = (int) (editTextWidthSP * dialog.getContext().getResources().getDisplayMetrics().scaledDensity);

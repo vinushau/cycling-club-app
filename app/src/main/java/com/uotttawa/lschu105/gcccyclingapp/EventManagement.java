@@ -71,7 +71,7 @@ public class EventManagement extends AppCompatActivity {
                         roundButton.setTextColor(Color.WHITE); // Set text color to white
                         roundButton.setOnClickListener(v -> {
                             EventEditor dialogHelper = new EventEditor();
-                            dialogHelper.showDialog(EventManagement.this, EventManagement.this, event);
+                            dialogHelper.showDialog(EventManagement.this, EventManagement.this, event, "none");
                         });
 
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -99,7 +99,7 @@ public class EventManagement extends AppCompatActivity {
                         roundButton.setTextColor(Color.WHITE);
                         roundButton.setOnClickListener(v -> {
                             EventEditor dialogHelper = new EventEditor();
-                            dialogHelper.showDialog(EventManagement.this, EventManagement.this, event);
+                            dialogHelper.showDialog(EventManagement.this, EventManagement.this, event, "none");
                         });
 
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(

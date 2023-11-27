@@ -62,7 +62,6 @@ public class ProfileView extends AppCompatActivity {
         });
         loadEventsFromFirebase();
         loadProfilePicture(username);
-        sortButton = findViewById(R.id.sortedBy);
         ascending = -1;
 
         imageView = findViewById(R.id.profilepicture);
@@ -125,6 +124,11 @@ public class ProfileView extends AppCompatActivity {
                 });
     }
     private void loadProfilePicture(String username) {
+        if (username == null) {
+            // Handle the case where username is null
+            return;
+        }
+
         DatabaseReference userReference = FirebaseDatabase.getInstance().getReference().child("Profile").child(username);
 
         userReference.addValueEventListener(new ValueEventListener() {
@@ -156,6 +160,8 @@ public class ProfileView extends AppCompatActivity {
         containerLayout.removeAllViews();
         System.out.println("Sort button clicked");
         QuickSort.printArray(events);
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("username");
 
         for (Event event: events) {
             View cardView = LayoutInflater.from(ProfileView.this).inflate(R.layout.event_card, null);
@@ -169,8 +175,8 @@ public class ProfileView extends AppCompatActivity {
             int month = event.getMonth();
             int year = event.getYear();
 
-            String strDay = day > 10 ? Integer.toString(day) : "0" + Integer.toString(day);
-            String strMonth = month > 10 ? Integer.toString(month) : "0" + Integer.toString(month);
+            String strDay = day >= 10 ? Integer.toString(day) : "0" + day;
+            String strMonth = month >= 10 ? Integer.toString(month) : "0" + month;
 
             String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
 
@@ -189,7 +195,7 @@ public class ProfileView extends AppCompatActivity {
             roundButton.setTextColor(Color.WHITE);
             roundButton.setOnClickListener(v -> {
                 EventEditor dialogHelper = new EventEditor();
-                dialogHelper.showDialog(ProfileView.this, ProfileView.this, event);
+                dialogHelper.showDialog(ProfileView.this, ProfileView.this, event, username);
             });
 
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -211,6 +217,8 @@ public class ProfileView extends AppCompatActivity {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Events");
         SharedPreferences preferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
         String userRole = preferences.getString("role", "");
+        Intent intent = getIntent();
+        String username = intent.getStringExtra("username");
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -242,8 +250,8 @@ public class ProfileView extends AppCompatActivity {
                         int month = event.getMonth();
                         int year = event.getYear();
 
-                        String strDay = day > 10 ? Integer.toString(day) : "0" + Integer.toString(day);
-                        String strMonth = month > 10 ? Integer.toString(month) : "0" + Integer.toString(month);
+                        String strDay = day >= 10 ? Integer.toString(day) : "0" + day;
+                        String strMonth = month >= 10 ? Integer.toString(month) : "0" + month;
 
                         String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
 
@@ -262,7 +270,7 @@ public class ProfileView extends AppCompatActivity {
                         roundButton.setTextColor(Color.WHITE);
                         roundButton.setOnClickListener(v -> {
                             EventEditor dialogHelper = new EventEditor();
-                            dialogHelper.showDialog(ProfileView.this, ProfileView.this, event);
+                            dialogHelper.showDialog(ProfileView.this, ProfileView.this, event, username);
                         });
 
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(

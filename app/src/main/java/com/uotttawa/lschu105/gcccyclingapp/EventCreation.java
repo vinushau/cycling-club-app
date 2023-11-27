@@ -238,6 +238,9 @@ public class EventCreation extends AppCompatActivity {
         setupNumberPicker();
         setupNumberPickerMonth();
         setupNumberPickerYear();
+        selectedNumberDisplay.setText(String.valueOf(numberPicker.getValue()));
+        selectedNumberDisplayMonth.setText(String.valueOf(numberPickerMonth.getValue()));
+        selectedNumberDisplayYear.setText(String.valueOf(numberPickerYear.getValue()));
 
         // Set click listeners for number picker containers
         numberPickerContainer.setOnClickListener(new View.OnClickListener() {
