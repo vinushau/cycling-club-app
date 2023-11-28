@@ -26,6 +26,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import android.content.SharedPreferences;
@@ -341,6 +345,31 @@ public class EventCreation extends AppCompatActivity {
         finish();
     }
     private boolean createEvent(String buttonName, Dialog dialog) {
+        Spinner spinner = dialog.findViewById(R.id.levelSpinner);
+        TextView selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
+        TextView selectedNumberDisplayMonth = dialog.findViewById(R.id.selectedNumberDisplayMonth);
+        TextView selectedNumberDisplayYear = dialog.findViewById(R.id.selectedNumberDisplayYear);
+
+        String day = selectedNumberDisplay.getText().toString();
+        String month = selectedNumberDisplayMonth.getText().toString();
+        String year = selectedNumberDisplayYear.getText().toString();
+        String dateFormatted = String.format("%s/%s/%s", day, month, year);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            LocalDate date = LocalDate.parse(dateFormatted, formatter);
+
+            // Check if the day of the month is valid for the given month and year
+            if (date.getDayOfMonth() != Integer.parseInt(day)) {
+                Toast.makeText(this, "Invalid date", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        } catch (DateTimeException | NumberFormatException e) {
+            Toast.makeText(this, "Invalid date format", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         TextFieldValidation(dialog);
 
         if (!isValidationSuccessful) {
@@ -351,23 +380,27 @@ public class EventCreation extends AppCompatActivity {
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
         String eventNameField = eventNameEditText.getText().toString();
 
-        Spinner levelSpinner = dialog.findViewById(R.id.levelSpinner);
-        String selectedLevel = levelSpinner.getSelectedItem().toString();
+        // Check if a valid level is selected
+        if (spinner.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Please select a valid difficulty level", Toast.LENGTH_SHORT).show();
+            return false;
+        }
 
-        String eventName = eventNameField;
-        System.out.println("Event name" + eventName);
-        String difficultyLevel = selectedLevel;
+        String selectedLevel = spinner.getSelectedItem().toString();
+
+        // Retrieve other necessary data for event creation
         Map<String, String> requirementsMap = getRequirements(dialog);
         SharedPreferences preferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
         String savedUsername = preferences.getString("username", "");
-        int selectedDay = numberPicker.getValue();
-        int selectedMonth = numberPickerMonth.getValue();
-        int selectedYear = numberPickerYear.getValue();
-        Event eventObject = new Event(savedUsername, difficultyLevel, buttonName, eventName, requirementsMap, selectedDay,selectedMonth,selectedYear);
-        System.out.println(eventObject);
+        int selectedDay = Integer.parseInt(day);
+        int selectedMonth = Integer.parseInt(month);
+        int selectedYear = Integer.parseInt(year);
 
-        // Add the EventObject to Firebase
-        return createFirebaseEntry(eventObject, eventName);
+        // Create the Event object
+        Event eventObject = new Event(savedUsername, selectedLevel, buttonName, eventNameField, requirementsMap, selectedDay, selectedMonth, selectedYear);
+
+        // Create Firebase entry for the event
+        return createFirebaseEntry(eventObject, eventNameField);
     }
 
     private void setupNumberPicker() {
@@ -427,16 +460,29 @@ public class EventCreation extends AppCompatActivity {
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
                 if (!editText.getHint().toString().toLowerCase().equals("name")) {
-                    System.out.println(editText.getHint().toString().toLowerCase());
                     String requirementKey = editText.getHint().toString().toLowerCase();
                     String requirementValue = editText.getText().toString();
-                    requirementsMap.put(requirementKey, requirementValue);
+
+                    // Check if the requirement is "age" and validate if it can be converted to an integer
+                    if (requirementKey.equals("age")) {
+                        try {
+                            int ageValue = Integer.parseInt(requirementValue);
+                            requirementsMap.put(requirementKey, String.valueOf(ageValue));
+                        } catch (NumberFormatException e) {
+                            // Show a Toast message if the string cannot be converted to an integer
+                            Toast.makeText(dialog.getContext(), "Please enter a valid age.", Toast.LENGTH_SHORT).show();
+                            return null; // Return null to indicate an error
+                        }
+                    } else {
+                        requirementsMap.put(requirementKey, requirementValue);
+                    }
                 }
             }
         }
         System.out.println(requirementsMap);
         return requirementsMap;
     }
+
 
     private void createEditTextFields(Dialog dialog, DataSnapshot requirementsSnapshot) {
         int editTextWidthSP = 300;

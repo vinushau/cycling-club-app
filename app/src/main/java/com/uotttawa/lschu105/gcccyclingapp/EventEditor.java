@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -30,11 +31,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EventEditor {
+    private Context context;
     private TextView selectedNumberDisplay;
     private TextView selectedNumberDisplayMonth;
     private TextView selectedNumberDisplayYear;
@@ -51,6 +56,7 @@ public class EventEditor {
     private boolean isValidationSuccessful = false;
 
     public void showDialog(Activity activity, Context context, Event event, String redirectUsername) {
+        this.context = context;
         SharedPreferences preferences = activity.getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
         String userRole = preferences.getString("role", "");
 
@@ -349,16 +355,48 @@ public class EventEditor {
     }
 
     private boolean updateEvent(Event event, Dialog dialog) {
+        Spinner spinner = dialog.findViewById(R.id.levelSpinner);
+        TextView selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
+        TextView selectedNumberDisplayMonth = dialog.findViewById(R.id.selectedNumberDisplayMonth);
+        TextView selectedNumberDisplayYear = dialog.findViewById(R.id.selectedNumberDisplayYear);
+
+        String day = selectedNumberDisplay.getText().toString();
+        String month = selectedNumberDisplayMonth.getText().toString();
+        String year = selectedNumberDisplayYear.getText().toString();
+        String dateFormatted = String.format("%s/%s/%s", day, month, year);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            LocalDate date = LocalDate.parse(dateFormatted, formatter);
+
+            // Check if the day of the month is valid for the given month and year
+            if (date.getDayOfMonth() != Integer.parseInt(day)) {
+                Toast.makeText(dialog.getContext(), "Invalid date", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        } catch (DateTimeException | NumberFormatException e) {
+            Toast.makeText(context, "Invalid date format", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         TextFieldValidation(dialog);
+
         if (!isValidationSuccessful) {
             return false;
         }
+
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
         String eventNameField = eventNameEditText.getText().toString();
 
-        Spinner levelSpinner = dialog.findViewById(R.id.levelSpinner);
-        levelSpinner.setVisibility(View.VISIBLE);
-        String selectedLevel = levelSpinner.getSelectedItem().toString();
+        // Check if a valid level is selected
+        if (spinner.getSelectedItemPosition() == 0) {
+            Toast.makeText(dialog.getContext(), "Please select a valid difficulty level", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        spinner.setVisibility(View.VISIBLE);
+        String selectedLevel = spinner.getSelectedItem().toString();
 
         String eventName = eventNameField;
         String difficultyLevel = selectedLevel;
@@ -366,7 +404,6 @@ public class EventEditor {
 
         DatabaseReference oldEventReference = FirebaseDatabase.getInstance().getReference("Events").child(event.getEventName());
         oldEventReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            // Inside the onDataChange method
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -385,14 +422,20 @@ public class EventEditor {
                                             int selectedDay = numberPicker.getValue();
                                             int selectedMonth = numberPickerMonth.getValue();
                                             int selectedYear = numberPickerYear.getValue();
+
                                             Event eventObject = new Event(event.getCreatedBy(), difficultyLevel, event.getEventType(), eventName, requirementsMap, selectedDay, selectedMonth, selectedYear);
-                                            System.out.println(event.getCreatedBy() + ", "+ difficultyLevel + ", " + event.getEventType() + ", " +  eventName + ", " + requirementsMap + ", " +selectedDay +", " + selectedMonth + ", " + selectedYear);
                                             createFirebaseEntry(eventObject, eventName);
                                         } else {
+                                            // Handle error when removing the user's event
+                                            Toast.makeText(dialog.getContext(), "Error updating event. Please try again.", Toast.LENGTH_SHORT).show();
+                                            Log.e("UpdateEvent", "Error removing user's event", error.toException());
                                         }
                                     }
                                 });
                             } else {
+                                // Handle error when deleting the old event reference
+                                Toast.makeText(dialog.getContext(), "Error updating event. Please try again.", Toast.LENGTH_SHORT).show();
+                                Log.e("UpdateEvent", "Error deleting old event reference", databaseError.toException());
                             }
                         }
                     });
@@ -404,8 +447,11 @@ public class EventEditor {
                 // Handle onCancelled event
             }
         });
+
         return true;
     }
+
+
 
     private Map<String, String> getRequirements(Dialog dialog) {
         LinearLayout linear = dialog.findViewById(R.id.LinearLayout);
@@ -417,16 +463,30 @@ public class EventEditor {
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
                 if (!editText.getHint().toString().toLowerCase().equals("name")) {
-                    System.out.println(editText.getHint().toString().toLowerCase());
                     String requirementKey = editText.getHint().toString().toLowerCase();
                     String requirementValue = editText.getText().toString();
-                    requirementsMap.put(requirementKey, requirementValue);
+
+                    // Check if the requirement is "age" and validate if it can be converted to an integer
+                    if (requirementKey.equals("age")) {
+                        try {
+                            int ageValue = Integer.parseInt(requirementValue);
+                            requirementsMap.put(requirementKey, String.valueOf(ageValue));
+                        } catch (NumberFormatException e) {
+                            // Handle the case where the age cannot be converted to an integer
+                            Toast.makeText(dialog.getContext(), "Please enter a valid age.", Toast.LENGTH_SHORT).show();
+                            return null; // Return null to indicate an error
+                        }
+                    } else {
+                        requirementsMap.put(requirementKey, requirementValue);
+                    }
                 }
             }
         }
+
         System.out.println(requirementsMap);
         return requirementsMap;
     }
+
 
     private void toggleNumberPickerVisibility() {
         if (numberPicker.getVisibility() == View.VISIBLE) {
