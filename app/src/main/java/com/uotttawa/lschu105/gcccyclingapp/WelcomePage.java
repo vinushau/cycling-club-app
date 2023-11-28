@@ -15,6 +15,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class WelcomePage extends AppCompatActivity {
     private ImageButton roundButton;
@@ -91,6 +96,44 @@ public class WelcomePage extends AppCompatActivity {
         String savedUsername = preferences.getString("username", "");
         String savedRole = preferences.getString("role", "");
         userName.setText(savedUsername);
+
+        // Retrieve profile information from Firebase
+        DatabaseReference profileRef = FirebaseDatabase.getInstance().getReference("Profile").child(savedUsername);
+        profileRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Convert DataSnapshot to Profile object
+                    Profile profile = dataSnapshot.getValue(Profile.class);
+
+                    // Validate profile data
+                    if (profile != null) {
+                        if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null) {
+                            // Redirect to ProfileSettings with extra intent
+                            Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
+                            intent.putExtra("username", savedUsername);
+                            startActivity(intent);
+                            finish();
+                        }
+                    } else {
+                        // Handle the case where the profile is null
+                    }
+                } else {
+                    // If the profile node does not exist, redirect to ProfileSettings
+                    Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
+                    intent.putExtra("username", savedUsername);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle errors if needed
+            }
+        });
+
+
         // Update text based on user role
         switch (savedRole) {
             case "Admin":

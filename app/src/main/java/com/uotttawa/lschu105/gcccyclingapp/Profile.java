@@ -2,16 +2,21 @@ package com.uotttawa.lschu105.gcccyclingapp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+
 
 public class Profile {
     private Map<String, Integer> ratings;
     private String email;
     private String displayName;
-    private String[] tags;
+    private List<String> tags;
     private Map<String, String> socialMediaLinks;
     private String phoneNumber;
     private String location;
+    private String mainContact;
 
+    public Profile() {
+    }
     public Profile(String phoneNumber, Map<String, String> socialMediaLinks) {
         this.socialMediaLinks = socialMediaLinks;
         this.phoneNumber = phoneNumber;
@@ -45,11 +50,11 @@ public class Profile {
     }
 
     // Getter and Setter for tags
-    public String[] getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(String[] tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
@@ -69,6 +74,15 @@ public class Profile {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    // Getter and Setter for main contact
+    public String getMainContact(){
+        return mainContact;
+    }
+
+    public void setMainContact(String mainContact){
+        this.mainContact = mainContact;
     }
 
     // Getter and Setter for location
