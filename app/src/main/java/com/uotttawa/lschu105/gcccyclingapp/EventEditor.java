@@ -34,6 +34,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -371,17 +372,16 @@ public class EventEditor {
         String year = selectedNumberDisplayYear.getText().toString();
         String dateFormatted = String.format("%s/%s/%s", day, month, year);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
             LocalDate date = LocalDate.parse(dateFormatted, formatter);
 
             // Check if the day of the month is valid for the given month and year
             if (date.getDayOfMonth() != Integer.parseInt(day)) {
-                Toast.makeText(dialog.getContext(), "Invalid date", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Invalid date", Toast.LENGTH_SHORT).show();
                 return false;
             }
-        } catch (DateTimeException | NumberFormatException e) {
+        } catch (DateTimeParseException e) {
             Toast.makeText(context, "Invalid date format", Toast.LENGTH_SHORT).show();
             return false;
         }
