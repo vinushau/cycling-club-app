@@ -1,5 +1,6 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,8 +20,9 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
+import androidx.cardview.widget.CardView;
 
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.database.DataSnapshot;
@@ -31,9 +34,13 @@ import com.google.firebase.storage.StorageReference;
 import com.uotttawa.lschu105.gcccyclingapp.Utils.QuickSort;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.google.firebase.storage.FirebaseStorage;
+
+import org.w3c.dom.Text;
 
 public class ProfileView extends AppCompatActivity {
     private TextView sortButton;
@@ -57,7 +64,6 @@ public class ProfileView extends AppCompatActivity {
 
         Intent intent = getIntent();
         String username = intent.getStringExtra("username");
-        ProfileName.setText(username);
         ProfileUsername.setText("@" + username);
         profile.setOnClickListener(v -> {
             Intent Intent = new Intent(getApplicationContext(), WelcomePage.class);
@@ -66,6 +72,7 @@ public class ProfileView extends AppCompatActivity {
         });
         loadEventsFromFirebase();
         loadProfilePicture(username);
+        loadProfile(username);
         ascending = -1;
 
         imageView = findViewById(R.id.profilepicture);
@@ -74,6 +81,47 @@ public class ProfileView extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openGallery();
+            }
+        });
+        LinearLayout tagContainerLayout = findViewById(R.id.TagsContainer);
+        CardView moreTagsButton = findViewById(R.id.moreTags); // Assuming you have a button for more tags
+        StringBuilder moreTagsStringBuilder = new StringBuilder();
+
+        DatabaseReference eventTypesRef = FirebaseDatabase.getInstance().getReference().child("Profile").child(username).child("tags");
+        eventTypesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                boolean firstTag = true;
+                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
+                    String tag = eventSnapshot.getValue(String.class);
+
+                    if (firstTag) {
+                        LinearLayout Tags = findViewById(R.id.tags);
+                        Tags.setVisibility(View.VISIBLE);
+                        View tagView = LayoutInflater.from(ProfileView.this).inflate(R.layout.tag_card_view, tagContainerLayout, false);
+                        TextView tagTextView = tagView.findViewById(R.id.tagTextView);
+                        tagTextView.setText(tag);
+                        tagContainerLayout.addView(tagView, 0);
+                        firstTag = false;
+                    } else {
+                        moreTagsButton.setVisibility(View.VISIBLE);
+                        moreTagsStringBuilder.append(tag).append("\n");
+                    }
+                }
+
+                moreTagsButton.setOnClickListener(v -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ProfileView.this);
+                    builder.setTitle("More Tags")
+                            .setMessage(moreTagsStringBuilder.toString())
+                            .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle errors
             }
         });
     }
@@ -141,6 +189,10 @@ public class ProfileView extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     // Retrieve the image URL from the database
                     String imageUrl = dataSnapshot.child("picture").getValue(String.class);
+                    if (isDestroyed()) {
+                        // The activity is destroyed, don't proceed
+                        return;
+                    }
 
                     if (imageUrl != null) {
                         Glide.with(ProfileView.this)
@@ -302,6 +354,7 @@ public class ProfileView extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         Intent intent = new Intent(this, WelcomePage.class);
         startActivity(intent);
         finish();
@@ -322,4 +375,134 @@ public class ProfileView extends AppCompatActivity {
             }
         });
     }
+
+    private void loadProfile(String username) {
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference().child("Profile").child(username);
+
+        userReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (isDestroyed()) {
+                    // The activity is destroyed, don't proceed
+                    return;
+                }
+
+                if (dataSnapshot.exists()) {
+                    Profile profile = dataSnapshot.getValue(Profile.class);
+                    TextView ProfileName = findViewById(R.id.ProfileName);
+                    TextView location = findViewById(R.id.location);
+                    ProfileName.setText(!profile.getDisplayName().isEmpty() ? profile.getDisplayName() : username);
+                    location.setText(!profile.getLocation().isEmpty() ? profile.getLocation() : "None");
+
+                    try {
+                        associateSocialMediaLinks(profile.getSocialMediaLinks());
+                    } catch (Exception exception) {
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle onCancelled event
+            }
+        });
+    }
+    private void associateSocialMediaLinks(Map<String, String> socialMediaLinks) {
+        // Get ImageButton references
+        ImageButton imageButton1 = findViewById(R.id.imageButton1);
+        ImageButton imageButton2 = findViewById(R.id.imageButton2);
+        ImageButton imageButton3 = findViewById(R.id.imageButton3);
+        ImageButton imageButton4 = findViewById(R.id.imageButton4);
+
+        // Create a list of ImageButton references for easy access
+        List<ImageButton> imageButtons = Arrays.asList(imageButton1, imageButton2, imageButton3, imageButton4);
+
+        // Loop through each social media link in the map and set the corresponding icon
+        int buttonNumber = 0;
+        for (Map.Entry<String, String> entry : socialMediaLinks.entrySet()) {
+            if (buttonNumber >= imageButtons.size()) {
+                break;
+            }
+
+            String socialMediaName = entry.getKey();
+            System.out.println(socialMediaName);
+            String link = entry.getValue();
+
+            String iconName = socialMediaName;
+
+            downloadAndSetIcon(iconName, link, imageButtons.get(buttonNumber));
+
+            buttonNumber++;
+        }
+    }
+
+    private void downloadAndSetIcon(String iconName, String link, ImageButton imageButton) {
+        DatabaseReference userReference = FirebaseDatabase.getInstance().getReference().child("Icons").child("CyclingOttawa");
+
+        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (isDestroyed()) {
+                    // The activity is destroyed, don't proceed
+                    return;
+                }
+
+                if (dataSnapshot.exists()) {
+                    // Check if the map is empty
+                    if (dataSnapshot.getChildrenCount() == 0) {
+                        // Map is empty, display "help" image
+                        displayHelpImage(imageButton);
+                        return;
+                    }
+
+                    // Retrieve the image URL from the database
+                    String imageUrl = dataSnapshot.child(iconName).getValue(String.class);
+
+                    // Check if the image URL is null or empty
+                    if (imageUrl == null || imageUrl.isEmpty()) {
+                        // Image URL is invalid, display "help" image
+                        displayHelpImage(imageButton);
+                        return;
+                    }
+
+                    // Load the image using Glide only if the activity is still valid
+                    if (!isDestroyed()) {
+                        imageButton.setVisibility(View.VISIBLE);
+                        Glide.with(ProfileView.this)
+                                .load(imageUrl)
+                                .into(imageButton);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle onCancelled event
+            }
+        });
+
+        // Set a click listener to open the associated link
+        imageButton.setOnClickListener(v -> openLinkInBrowser(link));
+    }
+
+    private void displayHelpImage(ImageButton imageButton) {
+        // Set the "help" image to the ImageButton
+        imageButton.setImageResource(R.drawable.baseline_error); // Replace with the actual resource ID of your "help" image
+        imageButton.setVisibility(View.VISIBLE);
+
+        // Set a click listener to provide help or handle the case
+        imageButton.setOnClickListener(v -> {
+            Toast.makeText(ProfileView.this, "Help: Invalid or missing icon", Toast.LENGTH_LONG).show();
+        });
+    }
+
+
+    private void openLinkInBrowser(String link) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+            startActivity(intent);
+        }catch (ActivityNotFoundException exception){
+            Toast.makeText(ProfileView.this, "Invalid link", Toast.LENGTH_LONG).show(); // Add show() method
+        }
+    }
+
 }

@@ -22,7 +22,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ProfileSettings extends AppCompatActivity {
@@ -43,6 +45,8 @@ public class ProfileSettings extends AppCompatActivity {
             startActivity(profileViewIntent);
             finish();
         });
+        Button addTagsButton = findViewById(R.id.addTags);
+        addTagsButton.setOnClickListener(v -> onAddTags());
 
         DatabaseReference profileDetails = FirebaseDatabase.getInstance().getReference().child("Profile").child(username);
 
@@ -62,7 +66,7 @@ public class ProfileSettings extends AppCompatActivity {
                     createEditTextFields(ProfileSettings.this, profile.getSocialMediaLinks() != null ? profile.getSocialMediaLinks(): null);
 
                     updateLocation(profile.getLocation() != null ? profile.getLocation() : "");
-
+                    createTagFields(ProfileSettings.this,profile.getTags() != null ? profile.getTags(): null);
                     Button UpdateButton = findViewById(R.id.updateButton);
                     UpdateButton.setOnClickListener(v -> updateProfile(profile, username));
                 }
@@ -80,7 +84,7 @@ public class ProfileSettings extends AppCompatActivity {
                     createEditTextFields(ProfileSettings.this, profile.getSocialMediaLinks() != null ? profile.getSocialMediaLinks(): null);
 
                     updateLocation(profile.getLocation() != null ? profile.getLocation() : "");
-
+                    createTagFields(ProfileSettings.this,profile.getTags() != null ? profile.getTags(): null);
                     Button UpdateButton = findViewById(R.id.updateButton);
                     UpdateButton.setOnClickListener(v -> updateProfile(profile, username));
                 }
@@ -141,7 +145,62 @@ public class ProfileSettings extends AppCompatActivity {
         }
     }
 
+    private void createTagFields(Context context, List<String> tags) {
+        int editTextWidthSP = 300;
+        int spaceHeightPixels = 25;
 
+        int editTextWidthPixels = (int) (editTextWidthSP * context.getResources().getDisplayMetrics().scaledDensity);
+
+        LinearLayout linearLayout = findViewById(R.id.LinearLayout);
+
+        Space space = new Space(context);
+        space.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                spaceHeightPixels));
+        linearLayout.addView(space);
+
+        if (tags == null) {
+            onAddTags();
+        } else {
+            for (String tag : tags) {
+                // Create an EditText for the tag
+                EditText editText = new EditText(context);
+                editText.setLayoutParams(new LinearLayout.LayoutParams(
+                        editTextWidthPixels,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
+                editText.setText(tag);
+                editText.setHint("Tag (optional)");
+                editText.setTextColor(context.getResources().getColor(R.color.black));
+                editText.setTextSize(20);
+                linearLayout.addView(editText);
+            }
+        }
+    }
+    private void onAddTags() {
+        Context context = ProfileSettings.this;
+
+        int editTextWidthSP = 300;
+        int spaceHeightPixels = 25;
+
+        int editTextWidthPixels = (int) (editTextWidthSP * context.getResources().getDisplayMetrics().scaledDensity);
+
+        LinearLayout linearLayout = findViewById(R.id.LinearLayout);
+
+        Space space = new Space(context);
+        space.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                spaceHeightPixels));
+        linearLayout.addView(space);
+
+        EditText editText = new EditText(context);
+        editText.setLayoutParams(new LinearLayout.LayoutParams(
+                editTextWidthPixels,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        editText.setHint("Tag (optional)");
+        editText.setTextColor(context.getResources().getColor(R.color.black));
+        editText.setTextSize(20);
+        linearLayout.addView(editText);
+    }
 
     public void onAddLink(View view) {
         // Call the existing method
@@ -290,6 +349,9 @@ public class ProfileSettings extends AppCompatActivity {
     }
 
     private void updateProfile(Profile profile, String username){
+        List<String> tags = new ArrayList<>();
+        profile.setTags(tags);
+
         LinearLayout linearLayout = findViewById(R.id.Header);
         for (int i = 0; i < linearLayout.getChildCount(); i++) {
             View childView = linearLayout.getChildAt(i);
@@ -326,7 +388,16 @@ public class ProfileSettings extends AppCompatActivity {
                     }
                 } else if (editText.getHint().toString().toLowerCase().equals("main contact(optional)")) {
                     profile.setMainContact(editText.getText().toString());
-                } else {
+                } else if (editText.getHint().toString().toLowerCase().equals("tag (optional)")) {
+                    String enteredTag = editText.getText().toString();
+                    //only adds tag to list if its filled out
+                    if (editText.getText().toString().toLowerCase().equals("")) {
+
+                    } else if (!enteredTag.trim().isEmpty()) {
+                        tags.add(enteredTag);
+                    }
+                }
+                else{
                     if (editText.getText().toString().equals("")){
                         Toast.makeText(ProfileSettings.this, "Enter Social Media Link", Toast.LENGTH_SHORT).show();
                         return;
@@ -354,7 +425,6 @@ public class ProfileSettings extends AppCompatActivity {
         // The domain is the last part (index length-1)
         return parts.length > 1 ? parts[parts.length - 2] : "";
     }
-
 
     private void updateToFirebase(Profile profile, String username){
         LinearLayout linearLayout = findViewById(R.id.Header);

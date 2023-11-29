@@ -108,8 +108,7 @@ public class WelcomePage extends AppCompatActivity {
 
                     // Validate profile data
                     if (profile != null) {
-                        if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null) {
-                            // Redirect to ProfileSettings with extra intent
+                        if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null || profile.getLocation() == null) {
                             Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
                             intent.putExtra("username", savedUsername);
                             startActivity(intent);

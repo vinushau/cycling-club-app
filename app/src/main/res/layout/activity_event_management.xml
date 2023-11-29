@@ -12,8 +12,8 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="230dp"
-        app:srcCompat="@drawable/white_eventtype" />
+        android:layout_height="190dp"
+        app:srcCompat="@drawable/cyclingbanner" />
 
     <ImageView
         android:id="@+id/imageView4"

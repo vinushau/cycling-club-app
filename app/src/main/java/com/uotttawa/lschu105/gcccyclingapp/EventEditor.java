@@ -310,6 +310,9 @@ public class EventEditor {
         isValidationSuccessful = true;
     }
     private void createEditTextFields(Dialog dialog, Map<String, String> requirementsMap) {
+        if (requirementsMap == null){
+            return;
+        }
         int editTextWidthSP = 300;
         int spaceHeightPixels = 25;
 
@@ -355,6 +358,9 @@ public class EventEditor {
     }
 
     private boolean updateEvent(Event event, Dialog dialog) {
+        if (getRequirements(dialog) == null) {
+            return false;
+        }
         Spinner spinner = dialog.findViewById(R.id.levelSpinner);
         TextView selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
         TextView selectedNumberDisplayMonth = dialog.findViewById(R.id.selectedNumberDisplayMonth);

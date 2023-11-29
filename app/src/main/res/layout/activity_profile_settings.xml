@@ -3,7 +3,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/LinearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -50,42 +49,61 @@
         </androidx.cardview.widget.CardView>
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffff"
-        android:backgroundTint="#ffffff"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <Space
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+        <LinearLayout
+            android:id="@+id/LinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:backgroundTint="#ffffff"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/addSocialMedia"
-            android:layout_width="250dp"
-            android:layout_height="60sp"
-            android:layout_gravity="center"
-            android:backgroundTint="#7169E4"
-            android:fontFamily="@font/inter_semibold"
-            android:onClick="onAddLink"
-            android:text="Add Social Media Links"
-            app:cornerRadius="8dp" />
+            <Space
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
 
-        <Space
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            <Button
+                android:id="@+id/addSocialMedia"
+                android:layout_width="250dp"
+                android:layout_height="60sp"
+                android:layout_gravity="center"
+                android:backgroundTint="#7169E4"
+                android:fontFamily="@font/inter_semibold"
+                android:onClick="onAddLink"
+                android:text="Add Social Media Links"
+                app:cornerRadius="8dp" />
 
-        <Button
-            android:id="@+id/updateButton"
-            android:layout_width="250dp"
-            android:layout_height="60sp"
-            android:layout_gravity="center"
-            android:backgroundTint="#7169E4"
-            android:fontFamily="@font/inter_semibold"
-            android:text="Update Profile"
-            app:cornerRadius="8dp" />
+            <Space
+                android:layout_width="30dp"
+                android:layout_height="20dp" />
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/updateButton"
+                android:layout_width="250dp"
+                android:layout_height="60sp"
+                android:layout_gravity="center"
+                android:backgroundTint="#7169E4"
+                android:fontFamily="@font/inter_semibold"
+                android:text="Update Profile"
+                app:cornerRadius="8dp" />
+
+            <Space
+                android:layout_width="30dp"
+                android:layout_height="20dp" />
+
+            <Button
+                android:id="@+id/addTags"
+                android:layout_width="250dp"
+                android:layout_height="60sp"
+                android:layout_gravity="center"
+                android:backgroundTint="#7169E4"
+                android:fontFamily="@font/inter_semibold"
+                android:text="Add Tags"
+                app:cornerRadius="8dp" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

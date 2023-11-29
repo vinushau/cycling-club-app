@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import android.content.SharedPreferences;
@@ -345,7 +346,9 @@ public class EventCreation extends AppCompatActivity {
         finish();
     }
     private boolean createEvent(String buttonName, Dialog dialog) {
-        Spinner spinner = dialog.findViewById(R.id.levelSpinner);
+        if (getRequirements(dialog) == null) {
+            return false;
+        }
         TextView selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
         TextView selectedNumberDisplayMonth = dialog.findViewById(R.id.selectedNumberDisplayMonth);
         TextView selectedNumberDisplayYear = dialog.findViewById(R.id.selectedNumberDisplayYear);
@@ -355,9 +358,8 @@ public class EventCreation extends AppCompatActivity {
         String year = selectedNumberDisplayYear.getText().toString();
         String dateFormatted = String.format("%s/%s/%s", day, month, year);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
             LocalDate date = LocalDate.parse(dateFormatted, formatter);
 
             // Check if the day of the month is valid for the given month and year
@@ -365,11 +367,12 @@ public class EventCreation extends AppCompatActivity {
                 Toast.makeText(this, "Invalid date", Toast.LENGTH_SHORT).show();
                 return false;
             }
-        } catch (DateTimeException | NumberFormatException e) {
+        } catch (DateTimeParseException e) {
             Toast.makeText(this, "Invalid date format", Toast.LENGTH_SHORT).show();
             return false;
         }
 
+        // Validate other fields
         TextFieldValidation(dialog);
 
         if (!isValidationSuccessful) {
@@ -377,8 +380,8 @@ public class EventCreation extends AppCompatActivity {
             return false;
         }
 
+        Spinner spinner = dialog.findViewById(R.id.levelSpinner);
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
-        String eventNameField = eventNameEditText.getText().toString();
 
         // Check if a valid level is selected
         if (spinner.getSelectedItemPosition() == 0) {
@@ -386,7 +389,7 @@ public class EventCreation extends AppCompatActivity {
             return false;
         }
 
-        String selectedLevel = spinner.getSelectedItem().toString();
+        // Additional validations can be added as needed
 
         // Retrieve other necessary data for event creation
         Map<String, String> requirementsMap = getRequirements(dialog);
@@ -397,10 +400,10 @@ public class EventCreation extends AppCompatActivity {
         int selectedYear = Integer.parseInt(year);
 
         // Create the Event object
-        Event eventObject = new Event(savedUsername, selectedLevel, buttonName, eventNameField, requirementsMap, selectedDay, selectedMonth, selectedYear);
+        Event eventObject = new Event(savedUsername, spinner.getSelectedItem().toString(), buttonName, eventNameEditText.getText().toString(), requirementsMap, selectedDay, selectedMonth, selectedYear);
 
         // Create Firebase entry for the event
-        return createFirebaseEntry(eventObject, eventNameField);
+        return createFirebaseEntry(eventObject, eventNameEditText.getText().toString());
     }
 
     private void setupNumberPicker() {

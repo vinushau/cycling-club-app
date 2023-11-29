@@ -14,6 +14,7 @@ public class Profile {
     private String phoneNumber;
     private String location;
     private String mainContact;
+    private String picture;
 
     public Profile() {
     }
@@ -93,4 +94,13 @@ public class Profile {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
 }

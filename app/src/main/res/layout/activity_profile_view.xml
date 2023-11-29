@@ -89,9 +89,10 @@
                     android:fontFamily="@font/inter_semibold"
                     android:textColor="#FFFFFF" />
 
+
                 <Space
                     android:layout_width="match_parent"
-                    android:layout_height="60dp" />
+                    android:layout_height="50dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -156,25 +157,59 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#7F77F1"
-                    android:gravity="center_horizontal"
+                    android:gravity="center|top"
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/Socials"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="22dp"
                         android:fontFamily="@font/inter_extrabold"
-                        android:text="Limit"
+                        android:text="Socials"
                         android:textColor="#FFFFFF"
                         android:textSize="16sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/baseline_group"
-                        android:text="250"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp" />
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/imageButton1"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:background="#00FFFFFF"
+                            android:visibility="gone" />
+
+                        <ImageButton
+                            android:id="@+id/imageButton2"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:background="#00FFFFFF"
+                            android:visibility="gone" />
+
+                        <ImageButton
+                            android:id="@+id/imageButton3"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:background="#00FFFFFF"
+                            android:visibility="gone" />
+
+                        <ImageButton
+                            android:id="@+id/imageButton4"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:background="#00FFFFFF"
+                            android:src="@drawable/baseline_more_horiz_24"
+                            android:visibility="gone" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -195,6 +230,7 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/location"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:drawableLeft="@drawable/baseline_location_on_24"
@@ -202,6 +238,56 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tags"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#7F77F1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="22dp"
+                        android:fontFamily="@font/inter_extrabold"
+                        android:text="Tags"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp" />
+
+                    <LinearLayout
+                        android:id="@+id/TagsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="22dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/moreTags"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="5dp"
+                            android:backgroundTint="#FFFFFF"
+                            android:visibility="gone"
+                            app:cardCornerRadius="6dp">
+
+                            <ImageView
+                                android:id="@+id/imageView2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="1dp"
+                                android:src="@drawable/baseline_exposure_plus_1_24" />
+                        </androidx.cardview.widget.CardView>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
 
             </LinearLayout>
 

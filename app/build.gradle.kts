@@ -50,4 +50,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation ("com.google.android.material:material:1.5.0-alpha01")
+    implementation ("com.caverock:androidsvg:1.4")
+    implementation ("com.firebaseui:firebase-ui-storage:8.0.2")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+
 }
