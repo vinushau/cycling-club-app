@@ -11,7 +11,6 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -328,7 +327,12 @@ public class ProfileView extends AppCompatActivity {
                             EventEditor dialogHelper = new EventEditor();
                             dialogHelper.showDialog(ProfileView.this, ProfileView.this, event, username);
                         });
+                        TextView location = cardView.findViewById(R.id.location);
+                        try {
+                            location.setText(event.getLocation());
+                        } catch(Exception e){
 
+                        }
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -350,14 +354,6 @@ public class ProfileView extends AppCompatActivity {
                 // Handle onCancelled event
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Intent intent = new Intent(this, WelcomePage.class);
-        startActivity(intent);
-        finish();
     }
 
     // Set up click listener for the menu profile button

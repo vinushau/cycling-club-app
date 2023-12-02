@@ -78,8 +78,8 @@ public class EventEditor {
         dialog.setContentView(R.layout.event_creation_dialog);
 
         TextView dialogTitle = dialog.findViewById(R.id.dialogTitle);
-        dialogTitle.setText(event.getEventName());
-        createTextField(dialog, "Created by " + event.getCreatedBy());
+        dialogTitle.setText(event.getEventName() + " by " + event.getCreatedBy());
+        //createTextField(dialog, "Created by " + event.getCreatedBy());
         Button updateButton = dialog.findViewById(R.id.updateButton);
         updateButton.setVisibility(View.VISIBLE);
 
@@ -90,8 +90,13 @@ public class EventEditor {
         LinearLayout numberpicker = dialog.findViewById(R.id.number);
         numberpicker.setVisibility(View.VISIBLE);
         EditText TitleField = dialog.findViewById(R.id.nameField);
+        EditText locationField = dialog.findViewById(R.id.locationField);
         TitleField.setText(event.getEventName());
+        try {
+            locationField.setText(event.getLocation().toString());
+        }catch (Exception e){
 
+        }
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         layoutParams.copyFrom(dialog.getWindow().getAttributes());
 
@@ -149,12 +154,8 @@ public class EventEditor {
         });
         dialog.setCanceledOnTouchOutside(true);
         dialog.setOnDismissListener(dialogInterface -> {
+            dialog.dismiss();
             windowManager.removeView(dimOverlay);
-            Intent intent = new Intent(activity, activity.getClass());
-            intent.putExtra("username", redirectUsername);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            activity.startActivity(intent);
-            activity.finish();
         });
 
         dialog.show();
@@ -393,7 +394,9 @@ public class EventEditor {
         }
 
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
+        EditText locationEditText = dialog.findViewById(R.id.location);
         String eventNameField = eventNameEditText.getText().toString();
+        String location = locationEditText.getText().toString();
 
         // Check if a valid level is selected
         if (spinner.getSelectedItemPosition() == 0) {
@@ -429,7 +432,7 @@ public class EventEditor {
                                             int selectedMonth = numberPickerMonth.getValue();
                                             int selectedYear = numberPickerYear.getValue();
 
-                                            Event eventObject = new Event(event.getCreatedBy(), difficultyLevel, event.getEventType(), eventName, requirementsMap, selectedDay, selectedMonth, selectedYear);
+                                            Event eventObject = new Event(event.getCreatedBy(), difficultyLevel, event.getEventType(), eventName, location, requirementsMap, selectedDay, selectedMonth, selectedYear);
                                             createFirebaseEntry(eventObject, eventName);
                                         } else {
                                             // Handle error when removing the user's event
@@ -468,7 +471,7 @@ public class EventEditor {
 
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
-                if (!editText.getHint().toString().toLowerCase().equals("name")) {
+                if (!editText.getHint().toString().toLowerCase().equals("name") &&!editText.getHint().toString().toLowerCase().equals("location (city)")) {
                     String requirementKey = editText.getHint().toString().toLowerCase();
                     String requirementValue = editText.getText().toString();
 

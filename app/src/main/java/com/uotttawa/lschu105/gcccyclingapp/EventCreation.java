@@ -382,6 +382,7 @@ public class EventCreation extends AppCompatActivity {
 
         Spinner spinner = dialog.findViewById(R.id.levelSpinner);
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
+        EditText locationEditText = dialog.findViewById(R.id.locationField);
 
         // Check if a valid level is selected
         if (spinner.getSelectedItemPosition() == 0) {
@@ -400,7 +401,7 @@ public class EventCreation extends AppCompatActivity {
         int selectedYear = Integer.parseInt(year);
 
         // Create the Event object
-        Event eventObject = new Event(savedUsername, spinner.getSelectedItem().toString(), buttonName, eventNameEditText.getText().toString(), requirementsMap, selectedDay, selectedMonth, selectedYear);
+        Event eventObject = new Event(savedUsername, spinner.getSelectedItem().toString(), buttonName, eventNameEditText.getText().toString(),locationEditText.getText().toString() , requirementsMap, selectedDay, selectedMonth, selectedYear);
 
         // Create Firebase entry for the event
         return createFirebaseEntry(eventObject, eventNameEditText.getText().toString());
@@ -462,7 +463,7 @@ public class EventCreation extends AppCompatActivity {
 
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
-                if (!editText.getHint().toString().toLowerCase().equals("name")) {
+                if (!editText.getHint().toString().toLowerCase().equals("name") && !editText.getHint().toString().toLowerCase().equals("location (city)")) {
                     String requirementKey = editText.getHint().toString().toLowerCase();
                     String requirementValue = editText.getText().toString();
 

@@ -15,6 +15,7 @@ public class Event {
     private Integer day;
     private Integer month;
     private Integer year;
+    private String location;
 
     // Default constructor (needed for Firebase)
     public Event() {
@@ -34,11 +35,12 @@ public class Event {
         this.requirementsList = Requirements;
     }
     //Constructor for creating events
-    public Event(String createdBy, String difficultyLevel, String eventType, String eventName, Map<String, String> requirements, Integer day, Integer month, Integer year) {
+    public Event(String createdBy, String difficultyLevel, String eventType, String eventName, String location, Map<String, String> requirements, Integer day, Integer month, Integer year) {
         this.createdBy = createdBy;
         this.difficultyLevel = difficultyLevel;
         this.eventType = eventType;
         this.eventName = eventName;
+        this.location = location;
         this.requirements = requirements;
         this.day = day;
         this.month = month;
@@ -95,6 +97,12 @@ public class Event {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+    public String getLocation(){
+        return location;
+    }
+    public void setLocation(String location){
+        this.location = location;
     }
 
     public Map<String, String> getRequirements() {

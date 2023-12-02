@@ -8,198 +8,213 @@
     app:cardElevation="0dp"
     android:background="@android:color/transparent">
 
-    <LinearLayout
-        android:id="@+id/LinearLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:id="@+id/dialogTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingBottom="8dp"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/nameField"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="name"
-            android:inputType="text" />
-
+        android:layout_height="match_parent" >
 
         <LinearLayout
-            android:id="@+id/requirementsLayout"
+            android:id="@+id/LinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- EditText fields will be dynamically added here -->
-        </LinearLayout>
-
-        <Space
-            android:id="@+id/space0"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
-
-        <Spinner
-            android:id="@+id/levelSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/space0"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:hint="Difficulty Level"
-            android:textSize="20sp"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/number"
-            android:layout_width="wrap_content"
-            android:layout_height="150dp"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <RelativeLayout
-                android:id="@+id/numberPickerContainer"
-                android:layout_width="56dp"
+            <TextView
+                android:id="@+id/dialogTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:layout_marginRight="6dp"
-                android:background="@drawable/picker_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="16dp">
+                android:gravity="center"
+                android:paddingBottom="8dp"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/selectedNumberDisplay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:text="DD"
-                    android:textColor="#333333"
-                    android:textSize="18sp"
-                    android:visibility="visible" />
-
-                <NumberPicker
-                    android:id="@+id/numberPicker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="100dp"
-                    android:layout_below="@id/selectedNumberDisplay"
-                    android:visibility="gone" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/numberPickerContainerMonth"
-                android:layout_width="56dp"
+            <EditText
+                android:id="@+id/nameField"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:ems="10"
+                android:hint="name"
+                android:inputType="text" />
+
+
+            <EditText
+                android:id="@+id/locationField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Location (city)"
+                android:inputType="text" />
+
+            <LinearLayout
+                android:id="@+id/requirementsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- EditText fields will be dynamically added here -->
+            </LinearLayout>
+
+            <Space
+                android:id="@+id/space0"
+                android:layout_width="match_parent"
+                android:layout_height="0dp" />
+
+            <Spinner
+                android:id="@+id/levelSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/space0"
                 android:layout_gravity="center"
-                android:layout_marginLeft="6dp"
-                android:layout_marginRight="6dp"
-                android:background="@drawable/picker_background"
-                android:clickable="true"
-                android:focusable="true">
+                android:layout_marginTop="8dp"
+                android:hint="Difficulty Level"
+                android:textSize="20sp"
+                android:visibility="gone" />
 
-
-                <TextView
-                    android:id="@+id/selectedNumberDisplayMonth"
-                    android:layout_width="56dp"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
-                    android:text="MM"
-                    android:textAlignment="center"
-                    android:textColor="#333333"
-                    android:textSize="18sp"
-                    android:visibility="visible" />
-
+            <LinearLayout
+                android:id="@+id/number"
+                android:layout_width="wrap_content"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <RelativeLayout
-                    android:id="@+id/containerMonth"
+                    android:id="@+id/numberPickerContainer"
                     android:layout_width="56dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/selectedNumberDisplayMonth"
                     android:layout_centerInParent="true"
                     android:layout_gravity="center"
+                    android:layout_marginRight="6dp"
                     android:background="@drawable/picker_background"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="16dp"
-                    android:visibility="gone">
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/selectedNumberDisplay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:text="DD"
+                        android:textColor="#333333"
+                        android:textSize="18sp"
+                        android:visibility="visible" />
 
                     <NumberPicker
-                        android:id="@+id/numberPickerMonth"
+                        android:id="@+id/numberPicker"
                         android:layout_width="wrap_content"
                         android:layout_height="100dp"
-                        android:visibility="visible" />
+                        android:layout_below="@id/selectedNumberDisplay"
+                        android:visibility="gone" />
                 </RelativeLayout>
-            </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/numberPickerContainerYear"
-                android:layout_width="77dp"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:layout_marginLeft="6dp"
-                android:background="@drawable/picker_background"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/selectedNumberDisplayYear"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:id="@+id/numberPickerContainerMonth"
+                    android:layout_width="56dp"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:layout_gravity="center"
-                    android:text="YYYY"
-                    android:textColor="#333333"
-                    android:textSize="18sp"
-                    android:visibility="visible" />
-                <NumberPicker
-                    android:id="@+id/numberPickerYear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="100dp"
-                    android:layout_below="@id/selectedNumberDisplayYear"
-                    android:visibility="gone" />
-            </RelativeLayout>
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="6dp"
+                    android:background="@drawable/picker_background"
+                    android:clickable="true"
+                    android:focusable="true">
 
 
+                    <TextView
+                        android:id="@+id/selectedNumberDisplayMonth"
+                        android:layout_width="56dp"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:text="MM"
+                        android:textAlignment="center"
+                        android:textColor="#333333"
+                        android:textSize="18sp"
+                        android:visibility="visible" />
+
+
+                    <RelativeLayout
+                        android:id="@+id/containerMonth"
+                        android:layout_width="56dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/selectedNumberDisplayMonth"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:background="@drawable/picker_background"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="16dp"
+                        android:visibility="gone">
+
+                        <NumberPicker
+                            android:id="@+id/numberPickerMonth"
+                            android:layout_width="wrap_content"
+                            android:layout_height="100dp"
+                            android:visibility="visible" />
+                    </RelativeLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/numberPickerContainerYear"
+                    android:layout_width="77dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="6dp"
+                    android:background="@drawable/picker_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/selectedNumberDisplayYear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:text="YYYY"
+                        android:textColor="#333333"
+                        android:textSize="18sp"
+                        android:visibility="visible" />
+
+                    <NumberPicker
+                        android:id="@+id/numberPickerYear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="100dp"
+                        android:layout_below="@id/selectedNumberDisplayYear"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/updateButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#7169E4"
+                android:text="Update"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/addRequirement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#7169E4"
+                android:text="Add Requiremente"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/dialogButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#7169E4"
+                android:text="OK" />
         </LinearLayout>
+    </ScrollView>
 
-        <Button
-            android:id="@+id/updateButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Update"
-            android:backgroundTint="#7169E4"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/addRequirement"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#7169E4"
-            android:text="Add Requiremente"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/dialogButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#7169E4"
-            android:text="OK" />
-    </LinearLayout>
 </androidx.cardview.widget.CardView>
