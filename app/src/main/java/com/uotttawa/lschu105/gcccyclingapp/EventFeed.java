@@ -337,6 +337,31 @@ public class EventFeed extends AppCompatActivity {
         //just a if statement that checks "event.get name or eventname" == eventsearch.totext
         // use selectedTags arraylist so you can filter out events that dont have the right type,
         // to find the event type jut use event.getEventType in the if statement
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Events");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                containerLayout = findViewById(R.id.eventContainer);
+                containerLayout.removeAllViews();
+
+                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
+                    Event event = eventSnapshot.getValue(Event.class);
+                    System.out.println(event.getEventType());
+                    for (int i = 0; i < selectedTags.size(); i++) {
+                        if (event.getEventType().contains(selectedTags.get(i))) {
+                            events.add(event);
+                            createEventCard(event);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle onCancelled event
+            }
+        });
     }
 
     //Filters out events that do not contain whats in the search field
