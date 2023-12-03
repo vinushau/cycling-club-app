@@ -47,6 +47,8 @@ public class EventFeed extends AppCompatActivity {
     private ArrayList<CardView> selectedDialogEventTypes;
     private LinearLayout tagContainerLayout;
     private ArrayList<String> selectedTags;
+    private String eventSearch;
+    private String cyclingclubSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -263,6 +265,11 @@ public class EventFeed extends AppCompatActivity {
             windowManager.removeView(dimOverlay);
         });
 
+        EditText eventSearchField = dialog.findViewById(R.id.eventsearchfield);
+        EditText cyclingclubSearchField = dialog.findViewById(R.id.accountsearchfield);
+        eventSearchField.setText(eventSearch);
+        cyclingclubSearchField.setText(cyclingclubSearch);
+
         dialog.setCanceledOnTouchOutside(true);
         dialog.setOnDismissListener(dialogInterface -> windowManager.removeView(dimOverlay));
 
@@ -330,8 +337,9 @@ public class EventFeed extends AppCompatActivity {
     private void applyFilter(Dialog dialog) {
         EditText eventSearchField = dialog.findViewById(R.id.eventsearchfield);
         EditText cyclingclubSearchField = dialog.findViewById(R.id.accountsearchfield);
-        String eventSearch = eventSearchField.getText().toString();
-        String cyclingclubSearch = cyclingclubSearchField.getText().toString();
+        eventSearch = eventSearchField.getText().toString();
+        cyclingclubSearch = cyclingclubSearchField.getText().toString();
+
         //Basically it should use similar logic to load firebase, just filter out
         //events that dont contain whats in the search fields. So basically
         //just a if statement that checks "event.get name or eventname" == eventsearch.totext
@@ -347,11 +355,19 @@ public class EventFeed extends AppCompatActivity {
 
                 for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
                     Event event = eventSnapshot.getValue(Event.class);
-                    System.out.println(event.getEventType());
-                    for (int i = 0; i < selectedTags.size(); i++) {
-                        if (event.getEventType().contains(selectedTags.get(i))) {
-                            events.add(event);
-                            createEventCard(event);
+
+                    if (selectedTags.isEmpty() && eventSearch.isEmpty() && cyclingclubSearch.isEmpty() || selectedTags.isEmpty() && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || selectedTags.isEmpty() && eventSearch.isEmpty() && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || selectedTags.isEmpty() && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && cyclingclubSearch.isEmpty()) {
+                        events.add(event);
+                        createEventCard(event);
+                    }
+
+                    // check chosen filter option(s)
+                    else {
+                        for (int i = 0; i < selectedTags.size(); i++) {
+                            if (event.getEventType().contains(selectedTags.get(i)) && eventSearch.isEmpty() && cyclingclubSearch.isEmpty() || event.getEventType().contains(selectedTags.get(i)) && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || event.getEventType().contains(selectedTags.get(i)) && eventSearch.isEmpty() && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || event.getEventType().contains(selectedTags.get(i)) && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && cyclingclubSearch.isEmpty()) {
+                                events.add(event);
+                                createEventCard(event);
+                            }
                         }
                     }
                 }
