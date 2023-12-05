@@ -331,7 +331,7 @@ public class ClubFeedback extends AppCompatActivity {
         });
 
     }
-    private void addReviewToFirebase(String cyclingClubName, String username, int rating, String feedback) {
+    public void addReviewToFirebase(String cyclingClubName, String username, int rating, String feedback) {
         DatabaseReference reviewsRef = FirebaseDatabase.getInstance().getReference().child("Reviews")
                 .child(cyclingClubName).child(username);
 
