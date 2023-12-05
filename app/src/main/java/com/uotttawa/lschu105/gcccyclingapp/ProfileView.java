@@ -1,15 +1,20 @@
 package com.uotttawa.lschu105.gcccyclingapp;
 
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -345,6 +350,60 @@ public class ProfileView extends AppCompatActivity {
                         layoutParams.setMargins(sidemargininPixels, 0, sidemargininPixels, marginInPixels);
                         cardView.setLayoutParams(layoutParams);
                         containerLayout.addView(cardView);
+                    } else if (event.getCreatedBy().equals(username)) {
+                        events.add(event);
+
+                        View cardView = LayoutInflater.from(ProfileView.this).inflate(R.layout.event_card, null);
+
+                        TextView eventNameTextView = cardView.findViewById(R.id.TitleName);
+                        TextView eventCreator = cardView.findViewById(R.id.EventCreator);
+                        eventNameTextView.setText(event.getEventName());
+                        eventCreator.setText("Organised by: " + event.getCreatedBy());
+
+                        int day = event.getDay();
+                        int month = event.getMonth();
+                        int year = event.getYear();
+
+                        String strDay = day >= 10 ? Integer.toString(day) : "0" + day;
+                        String strMonth = month >= 10 ? Integer.toString(month) : "0" + month;
+
+                        String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
+
+                        TextView eventDateTextView = cardView.findViewById(R.id.EventDate);
+                        eventDateTextView.setText(dateFormatted);
+
+                        ShapeableImageView profilePicture = cardView.findViewById(R.id.ProfilePicture);
+                        profilePicture.setOnClickListener(v -> {
+                            Intent newIntent = new Intent(getApplicationContext(), ProfileView.class);
+                            newIntent.putExtra("username", event.getCreatedBy());
+                            startActivityForResult(newIntent, 0);
+                        });
+
+                        Button roundButton = cardView.findViewById(R.id.roundButton);
+                        roundButton.setText("Join");
+                        roundButton.setTextColor(Color.WHITE);
+                        roundButton.setOnClickListener(v -> {
+                            joinDialog(event);
+                        });
+                        TextView location = cardView.findViewById(R.id.location);
+                        try {
+                            location.setText(event.getLocation());
+                        } catch(Exception e){
+
+                        }
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        int marginInDp = 20;
+                        int marginInPixels = (int) (marginInDp * getResources().getDisplayMetrics().density);
+                        int sidemarginInDp = 18;
+                        int sidemargininPixels = (int) (sidemarginInDp * getResources().getDisplayMetrics().density);
+
+                        layoutParams.setMargins(sidemargininPixels, 0, sidemargininPixels, marginInPixels);
+                        cardView.setLayoutParams(layoutParams);
+                        containerLayout.addView(cardView);
+
                     }
                 }
             }
@@ -354,6 +413,146 @@ public class ProfileView extends AppCompatActivity {
                 // Handle onCancelled event
             }
         });
+    }
+    private void joinDialog(Event event) {
+        Dialog joinDialog = new Dialog(ProfileView.this);
+        joinDialog.setContentView(R.layout.event_card); // Reusing the event card layout
+
+        // Initialize dialog views and set up event details
+        TextView eventNameTextView = joinDialog.findViewById(R.id.TitleName);
+        TextView eventCreator = joinDialog.findViewById(R.id.EventCreator);
+        TextView eventLocation = joinDialog.findViewById(R.id.location);
+
+        eventNameTextView.setText(event.getEventName());
+        eventCreator.setText("Organized by: " + event.getCreatedBy());
+
+        int day = event.getDay();
+        int month = event.getMonth();
+        int year = event.getYear();
+
+        String strDay = day >= 10 ? Integer.toString(day) : "0" + day;
+        String strMonth = month >= 10 ? Integer.toString(month) : "0" + month;
+
+        String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
+
+        TextView eventDateTextView = joinDialog.findViewById(R.id.EventDate);
+        eventDateTextView.setText(dateFormatted);
+
+        // Set up other event details as needed
+        String eventName = event.getEventName();
+
+        // Fetch requirements from Firebase
+        DatabaseReference requirementsRef = FirebaseDatabase.getInstance().getReference()
+                .child("Events")
+                .child(eventName)
+                .child("requirements");
+
+        requirementsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                LinearLayout requirementsLayout = joinDialog.findViewById(R.id.RequirementsText);
+                TextView requirement = joinDialog.findViewById(R.id.requirement);
+                requirement.setVisibility(View.VISIBLE);
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+
+                int bottomMarginInDp = 15;  // Adjust margin as needed
+                int bottomMarginInPixels = (int) (bottomMarginInDp * getResources().getDisplayMetrics().density);
+                layoutParams.setMargins(0, 0, 0, bottomMarginInPixels);
+
+                requirementsLayout.setLayoutParams(layoutParams);
+
+                for (DataSnapshot requirementSnapshot : dataSnapshot.getChildren()) {
+                    String requirementKey = requirementSnapshot.getKey();
+                    String requirementValue = requirementSnapshot.getValue(String.class);
+
+                    // Create a new TextView for each requirement
+                    TextView requirementTextView = new TextView(ProfileView.this);
+                    requirementTextView.setText(requirementKey + ": " + requirementValue);
+                    LinearLayout.LayoutParams textViewLayoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    textViewLayoutParams.setMargins(bottomMarginInPixels, 0, 0, 0);
+
+                    // Apply layout parameters to the TextView
+                    requirementTextView.setLayoutParams(textViewLayoutParams);
+
+
+                    // Customize the TextView properties
+                    requirementTextView.setTextSize(18);  // Adjust text size as needed
+
+                    // Add the TextView to the RequirementsText LinearLayout
+                    requirementsLayout.addView(requirementTextView);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle errors
+            }
+        });
+
+        // Set up dialog button
+        Button joinButton = joinDialog.findViewById(R.id.roundButton);
+
+        joinButton.setText("Join");
+        joinButton.setOnClickListener(v -> {
+            DatabaseReference participantsRef = FirebaseDatabase.getInstance().getReference()
+                    .child("Events")
+                    .child(eventName)
+                    .child("Participants");
+
+            SharedPreferences preferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
+            String userId = preferences.getString("username", ""); // Replace with the actual user ID
+            participantsRef.child(userId).setValue(true);
+            DatabaseReference participantsRefs = FirebaseDatabase.getInstance().getReference()
+                    .child("Accounts")
+                    .child(userId)
+                    .child("Events");
+            participantsRefs.child(eventName).setValue(eventName);
+
+            joinDialog.dismiss();
+        });
+
+        // Set up the dimming overlay
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(joinDialog.getWindow().getAttributes());
+
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int dialogWidth = (int) (displayMetrics.widthPixels * 0.90f);
+        int dialogHeight = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        joinDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        layoutParams.width = dialogWidth;
+        layoutParams.height = dialogHeight;
+
+        // Add dim overlay to the window
+        WindowManager.LayoutParams dimLayoutParams = new WindowManager.LayoutParams();
+        dimLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        dimLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        dimLayoutParams.format = PixelFormat.TRANSLUCENT;
+
+        WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        View dimOverlay = new View(ProfileView.this);
+        dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
+        windowManager.addView(dimOverlay, dimLayoutParams);
+
+        joinDialog.getWindow().setAttributes(layoutParams);
+
+        dimOverlay.setOnClickListener(v -> {
+            joinDialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+
+        // Set dismiss listener to remove dim overlay
+        joinDialog.setOnDismissListener(dialogInterface -> windowManager.removeView(dimOverlay));
+
+        // Show the dialog
+        joinDialog.show();
     }
 
     // Set up click listener for the menu profile button

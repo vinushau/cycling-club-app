@@ -39,11 +39,10 @@ import com.uotttawa.lschu105.gcccyclingapp.Event;
 import com.uotttawa.lschu105.gcccyclingapp.WelcomePage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
-public class EventFeed extends AppCompatActivity {
-    private ArrayList<Event> events;
+public class ClubFeed extends AppCompatActivity {
+    private ArrayList<Profile> profiles;
     private LinearLayout containerLayout;
     private ShapeableImageView imageView;
     private ArrayList<CardView> selectedDialogEventTypes;
@@ -55,13 +54,13 @@ public class EventFeed extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_event_feed);
+        setContentView(R.layout.activity_club_feed);
         EditText searchField = findViewById(R.id.searchField);
 
         tagContainerLayout = findViewById(R.id.tagContainerLayout);
         ImageView filterIcon = findViewById(R.id.filterIcon);
         DatabaseReference eventTypesRef = FirebaseDatabase.getInstance().getReference("EventTypes");
-        events = new ArrayList<>();
+        profiles = new ArrayList<>();
         selectedTags = new ArrayList<>();
         loadEventsFromFirebase();
         filterIcon.setOnClickListener(v -> {
@@ -72,7 +71,7 @@ public class EventFeed extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
                     String tag = eventSnapshot.child("name").getValue(String.class);
-                    View tagView = LayoutInflater.from(EventFeed.this).inflate(R.layout.tag_card_view, tagContainerLayout, false);
+                    View tagView = LayoutInflater.from(ClubFeed.this).inflate(R.layout.tag_card_view, tagContainerLayout, false);
                     TextView tagTextView = tagView.findViewById(R.id.tagTextView);
                     tagTextView.setText(tag);
                     tagContainerLayout.addView(tagView);
@@ -97,31 +96,16 @@ public class EventFeed extends AppCompatActivity {
         });
     }
 
-    private void createEventCard(Event event) {
-        View cardView = LayoutInflater.from(EventFeed.this).inflate(R.layout.event_card, null);
+    private void createClubCard(Profile profile) {
+        View cardView = LayoutInflater.from(ClubFeed.this).inflate(R.layout.club_card, null);
 
         TextView eventNameTextView = cardView.findViewById(R.id.TitleName);
-        TextView eventCreator = cardView.findViewById(R.id.EventCreator);
-        TextView eventLocation = cardView.findViewById(R.id.location);
-        eventNameTextView.setText(event.getEventName());
-        eventCreator.setText("Organized by: " + event.getCreatedBy());
-
-        int day = event.getDay();
-        int month = event.getMonth();
-        int year = event.getYear();
-
-        String strDay = day >= 10 ? Integer.toString(day) : "0" + day;
-        String strMonth = month >= 10 ? Integer.toString(month) : "0" + month;
-
-        String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
-
-        TextView eventDateTextView = cardView.findViewById(R.id.EventDate);
-        eventDateTextView.setText(dateFormatted);
+        eventNameTextView.setText("@" + profile.getUsername());
 
         ShapeableImageView profilePicture = cardView.findViewById(R.id.ProfilePicture);
         profilePicture.setOnClickListener(v -> {
             Intent newIntent = new Intent(getApplicationContext(), ProfileView.class);
-            newIntent.putExtra("username", event.getCreatedBy());
+            newIntent.putExtra("username", profile.getUsername());
             startActivityForResult(newIntent, 0);
         });
 
@@ -129,17 +113,10 @@ public class EventFeed extends AppCompatActivity {
         roundButton.setText("View");
         roundButton.setTextColor(Color.WHITE);
         roundButton.setOnClickListener(v -> {
-
-
-
-            joinDialog(event);
+            Intent newIntent = new Intent(getApplicationContext(), ProfileView.class);
+            newIntent.putExtra("username", profile.getUsername());
+            startActivityForResult(newIntent, 0);
         });
-        TextView location = cardView.findViewById(R.id.location);
-        try {
-            location.setText(event.getLocation());
-        } catch(Exception e){
-
-        }
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -153,150 +130,9 @@ public class EventFeed extends AppCompatActivity {
         layoutParams.setMargins(sidemargininPixels, 5, sidemargininPixels, marginInPixels);
         cardView.setLayoutParams(layoutParams);
         ShapeableImageView image = cardView.findViewById(R.id.ProfilePicture);
-        loadProfilePicture(event.getCreatedBy(), image);
+        loadProfilePicture(profile.getUsername(), image);
         containerLayout.addView(cardView);
     }
-    private void joinDialog(Event event) {
-        Dialog joinDialog = new Dialog(EventFeed.this);
-        joinDialog.setContentView(R.layout.event_card); // Reusing the event card layout
-
-        // Initialize dialog views and set up event details
-        TextView eventNameTextView = joinDialog.findViewById(R.id.TitleName);
-        TextView eventCreator = joinDialog.findViewById(R.id.EventCreator);
-        TextView eventLocation = joinDialog.findViewById(R.id.location);
-
-        eventNameTextView.setText(event.getEventName());
-        eventCreator.setText("Organized by: " + event.getCreatedBy());
-
-        int day = event.getDay();
-        int month = event.getMonth();
-        int year = event.getYear();
-
-        String strDay = day >= 10 ? Integer.toString(day) : "0" + day;
-        String strMonth = month >= 10 ? Integer.toString(month) : "0" + month;
-
-        String dateFormatted = String.format("%s/%s/%d", strDay, strMonth, year);
-
-        TextView eventDateTextView = joinDialog.findViewById(R.id.EventDate);
-        eventDateTextView.setText(dateFormatted);
-
-        // Set up other event details as needed
-        String eventName = event.getEventName();
-
-        // Fetch requirements from Firebase
-        DatabaseReference requirementsRef = FirebaseDatabase.getInstance().getReference()
-                .child("Events")
-                .child(eventName)
-                .child("requirements");
-
-        requirementsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                LinearLayout requirementsLayout = joinDialog.findViewById(R.id.RequirementsText);
-                TextView requirement = joinDialog.findViewById(R.id.requirement);
-                requirement.setVisibility(View.VISIBLE);
-
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-                int bottomMarginInDp = 15;  // Adjust margin as needed
-                int bottomMarginInPixels = (int) (bottomMarginInDp * getResources().getDisplayMetrics().density);
-                layoutParams.setMargins(0, 0, 0, bottomMarginInPixels);
-
-                requirementsLayout.setLayoutParams(layoutParams);
-
-                for (DataSnapshot requirementSnapshot : dataSnapshot.getChildren()) {
-                    String requirementKey = requirementSnapshot.getKey();
-                    String requirementValue = requirementSnapshot.getValue(String.class);
-
-                    // Create a new TextView for each requirement
-                    TextView requirementTextView = new TextView(EventFeed.this);
-                    requirementTextView.setText(requirementKey + ": " + requirementValue);
-                    LinearLayout.LayoutParams textViewLayoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    );
-                    textViewLayoutParams.setMargins(bottomMarginInPixels, 0, 0, 0);
-
-                    // Apply layout parameters to the TextView
-                    requirementTextView.setLayoutParams(textViewLayoutParams);
-
-
-                    // Customize the TextView properties
-                    requirementTextView.setTextSize(18);  // Adjust text size as needed
-
-                    // Add the TextView to the RequirementsText LinearLayout
-                    requirementsLayout.addView(requirementTextView);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle errors
-            }
-        });
-
-        // Set up dialog button
-        Button joinButton = joinDialog.findViewById(R.id.roundButton);
-
-        joinButton.setText("Join");
-        joinButton.setOnClickListener(v -> {
-            DatabaseReference participantsRef = FirebaseDatabase.getInstance().getReference()
-                    .child("Events")
-                    .child(eventName)
-                    .child("Participants");
-
-            SharedPreferences preferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
-            String userId = preferences.getString("username", ""); // Replace with the actual user ID
-            participantsRef.child(userId).setValue(true);
-            DatabaseReference participantsRefs = FirebaseDatabase.getInstance().getReference()
-                    .child("Accounts")
-                    .child(userId)
-                    .child("Events");
-            participantsRefs.child(eventName).setValue(eventName);
-
-            joinDialog.dismiss();
-        });
-
-        // Set up the dimming overlay
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-        layoutParams.copyFrom(joinDialog.getWindow().getAttributes());
-
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        int dialogWidth = (int) (displayMetrics.widthPixels * 0.90f);
-        int dialogHeight = WindowManager.LayoutParams.WRAP_CONTENT;
-
-        joinDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        layoutParams.width = dialogWidth;
-        layoutParams.height = dialogHeight;
-
-        // Add dim overlay to the window
-        WindowManager.LayoutParams dimLayoutParams = new WindowManager.LayoutParams();
-        dimLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-        dimLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
-        dimLayoutParams.format = PixelFormat.TRANSLUCENT;
-
-        WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        View dimOverlay = new View(EventFeed.this);
-        dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
-        windowManager.addView(dimOverlay, dimLayoutParams);
-
-        joinDialog.getWindow().setAttributes(layoutParams);
-
-        dimOverlay.setOnClickListener(v -> {
-            joinDialog.dismiss();
-            windowManager.removeView(dimOverlay);
-        });
-
-        // Set dismiss listener to remove dim overlay
-        joinDialog.setOnDismissListener(dialogInterface -> windowManager.removeView(dimOverlay));
-
-        // Show the dialog
-        joinDialog.show();
-    }
-
     private void loadProfilePicture(String username, ShapeableImageView pfp) {
         if (username == null) {
             // Handle the case where username is null
@@ -317,7 +153,7 @@ public class EventFeed extends AppCompatActivity {
                     }
 
                     if (imageUrl != null) {
-                        Glide.with(EventFeed.this)
+                        Glide.with(ClubFeed.this)
                                 .load(imageUrl)
                                 .into(pfp);
                     }
@@ -332,12 +168,7 @@ public class EventFeed extends AppCompatActivity {
     }
 
     private void loadEventsFromFirebase() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Events");
-        SharedPreferences preferences = getSharedPreferences("loginPrefs", Context.MODE_PRIVATE);
-        String userRole = preferences.getString("role", "");
-        Intent intent = getIntent();
-        String username = intent.getStringExtra("username");
-
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Profile");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -346,10 +177,11 @@ public class EventFeed extends AppCompatActivity {
                 // Remove all views from the container layout
                 containerLayout.removeAllViews();
 
-                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
-                    Event event = eventSnapshot.getValue(Event.class);
-                    events.add(event);
-                    createEventCard(event);
+                for (DataSnapshot profilesnapshot : dataSnapshot.getChildren()) {
+                    Profile profile = profilesnapshot.getValue(Profile.class);
+                    profile.setUsername(profilesnapshot.getKey());
+                    profiles.add(profile);
+                    createClubCard(profile);
                 }
             }
 
@@ -360,9 +192,14 @@ public class EventFeed extends AppCompatActivity {
         });
     }
 
+    private ArrayList<String> getSelectedTags() {
+        return selectedTags;
+    }
     private void showDialog() {
-        Dialog dialog = new Dialog(EventFeed.this);
+
+        Dialog dialog = new Dialog(ClubFeed.this);
         dialog.setContentView(R.layout.search_filter_dialog);
+        dialog.findViewById(R.id.eventsearchcontainer).setVisibility(View.GONE);
 
         // Set up dialog button
         Button dialogButton = dialog.findViewById(R.id.dialogButton);
@@ -389,7 +226,7 @@ public class EventFeed extends AppCompatActivity {
         dimLayoutParams.format = PixelFormat.TRANSLUCENT;
 
         WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        View dimOverlay = new View(EventFeed.this);
+        View dimOverlay = new View(ClubFeed.this);
         dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
         windowManager.addView(dimOverlay, dimLayoutParams);
 
@@ -430,7 +267,7 @@ public class EventFeed extends AppCompatActivity {
                 // Get the container layout where you want to add the dynamic views
                 for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
                     Event event = eventSnapshot.getValue(Event.class);
-                    View eventCardView = LayoutInflater.from(EventFeed.this).inflate(R.layout.event_type_card, null);
+                    View eventCardView = LayoutInflater.from(ClubFeed.this).inflate(R.layout.event_type_card, null);
 
                     GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                     params.width = 0; // Set width to 0dp
@@ -475,45 +312,37 @@ public class EventFeed extends AppCompatActivity {
             }
         });
     }
-    private ArrayList<String> getSelectedTags() {
-        return selectedTags;
-    }
 
     private void applyFilter(Dialog dialog) {
-        EditText eventSearchField = dialog.findViewById(R.id.eventsearchfield);
         EditText cyclingclubSearchField = dialog.findViewById(R.id.accountsearchfield);
-        eventSearch = eventSearchField.getText().toString();
         cyclingclubSearch = cyclingclubSearchField.getText().toString();
 
-        //Basically it should use similar logic to load firebase, just filter out
-        //events that dont contain whats in the search fields. So basically
-        //just a if statement that checks "event.get name or eventname" == eventsearch.totext
-        // use selectedTags arraylist so you can filter out events that dont have the right type,
-        // to find the event type jut use event.getEventType in the if statement
-
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Events");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Profile");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 containerLayout = findViewById(R.id.eventContainer);
                 containerLayout.removeAllViews();
 
-                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
-                    Event event = eventSnapshot.getValue(Event.class);
+                for (DataSnapshot profileSnapShot : dataSnapshot.getChildren()) {
+                    Profile profile = profileSnapShot.getValue(Profile.class);
 
-                    if (selectedTags.isEmpty() && eventSearch.isEmpty() && cyclingclubSearch.isEmpty() || selectedTags.isEmpty() && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || selectedTags.isEmpty() && eventSearch.isEmpty() && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || selectedTags.isEmpty() && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && cyclingclubSearch.isEmpty()) {
-                        events.add(event);
-                        createEventCard(event);
-                    }
-
-                    // check chosen filter option(s)
-                    else {
-                        for (int i = 0; i < selectedTags.size(); i++) {
-                            if (event.getEventType().contains(selectedTags.get(i)) && eventSearch.isEmpty() && cyclingclubSearch.isEmpty() || event.getEventType().contains(selectedTags.get(i)) && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || event.getEventType().contains(selectedTags.get(i)) && eventSearch.isEmpty() && event.getCreatedBy().toLowerCase().contains(cyclingclubSearch.toLowerCase()) || event.getEventType().contains(selectedTags.get(i)) && event.getEventName().toLowerCase().contains(eventSearch.toLowerCase()) && cyclingclubSearch.isEmpty()) {
-                                events.add(event);
-                                createEventCard(event);
+                    if ((profile.getTags() != null && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())) || (profile.getTags() != null && cyclingclubSearch.equals(""))) {
+                        for (String tag : profile.getTags()) {
+                            for (String selectedTag : selectedTags) {
+                                if (tag.contains(selectedTag)) {
+                                    profiles.add(profile);
+                                    createClubCard(profile);
+                                }
                             }
                         }
+                        if (selectedTags.isEmpty() && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())){
+                            profiles.add(profile);
+                            createClubCard(profile);
+                        }
+                    } else if (selectedTags.isEmpty() && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())){
+                        profiles.add(profile);
+                        createClubCard(profile);
                     }
                 }
             }
@@ -527,19 +356,20 @@ public class EventFeed extends AppCompatActivity {
 
     //Filters out events that do not contain whats in the search field
     private void searchBar(String searchField){
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Events");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Profile");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 containerLayout = findViewById(R.id.eventContainer);
                 containerLayout.removeAllViews();
 
-                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
-                    Event event = eventSnapshot.getValue(Event.class);
-                    System.out.println(event.getEventName());
-                    if (event.getEventName().toLowerCase().contains(searchField.toLowerCase())) {
-                        events.add(event);
-                        createEventCard(event);
+                for (DataSnapshot profileSnapshot : dataSnapshot.getChildren()) {
+                    Profile profile = profileSnapshot.getValue(Profile.class);
+                    profile.setUsername(profileSnapshot.getKey());
+                    System.out.println("Profile" + profileSnapshot.getKey());
+                    if (profileSnapshot.getKey().toLowerCase().contains(searchField.toLowerCase())) {
+                        profiles.add(profile);
+                        createClubCard(profile);
                     }
                 }
             }

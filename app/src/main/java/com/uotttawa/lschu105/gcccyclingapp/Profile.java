@@ -15,6 +15,7 @@ public class Profile {
     private String location;
     private String mainContact;
     private String picture;
+    private String username;
 
     public Profile() {
     }
@@ -31,6 +32,15 @@ public class Profile {
     public void setRatings(Map<String, Integer> ratings) {
         this.ratings = ratings;
     }
+    public void addRatings(String key, Integer value) {
+        if (ratings == null) {
+            ratings = new HashMap<String, Integer>();
+            ratings.put(key, value);
+        } else {
+            ratings.put(key, value);
+        }
+    }
+
 
     // Getter and Setter for email
     public String getEmail() {
@@ -102,5 +112,13 @@ public class Profile {
     public void setPicture(String picture) {
         this.picture = picture;
     }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username){
+        this.username = username;
+    }
+
 
 }

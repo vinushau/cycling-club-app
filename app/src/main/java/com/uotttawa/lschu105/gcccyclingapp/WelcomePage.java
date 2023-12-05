@@ -98,39 +98,6 @@ public class WelcomePage extends AppCompatActivity {
         userName.setText(savedUsername);
 
         // Retrieve profile information from Firebase
-        DatabaseReference profileRef = FirebaseDatabase.getInstance().getReference("Profile").child(savedUsername);
-        profileRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    // Convert DataSnapshot to Profile object
-                    Profile profile = dataSnapshot.getValue(Profile.class);
-
-                    // Validate profile data
-                    if (profile != null) {
-                        if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null || profile.getLocation() == null) {
-                            Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
-                            intent.putExtra("username", savedUsername);
-                            startActivity(intent);
-                            finish();
-                        }
-                    } else {
-                        // Handle the case where the profile is null
-                    }
-                } else {
-                    // If the profile node does not exist, redirect to ProfileSettings
-                    Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
-                    intent.putExtra("username", savedUsername);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle errors if needed
-            }
-        });
 
 
         // Update text based on user role
@@ -145,18 +112,10 @@ public class WelcomePage extends AppCompatActivity {
                 break;
             case "Participant":
                 cardTitleBold.setText("Join an Event");
-                cardSubtitle.setText("Participant Card Subtitle");
+                cardSubtitle.setText("Find an event happening near you");
                 break;
         }
         updateButtonVisibility(savedRole);
-        Welcome = findViewById(R.id.userName);
-        Welcome.setOnClickListener(v -> {
-            String username = preferences.getString("username", "");
-            Intent intent = new Intent(getApplicationContext(), ProfileView.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
-            finish();
-        });
     }
     public void onNear(View view){
         Intent intent = new Intent(getApplicationContext(), EventFeed.class);
@@ -214,6 +173,10 @@ public class WelcomePage extends AppCompatActivity {
                 finish();
             }
         });
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        String savedUsername = preferences.getString("username", "");
+        String savedRole = preferences.getString("role", "");
+        userName.setText(savedUsername);
 
         // Update visibility based on user role
         switch (userRole) {
@@ -222,11 +185,152 @@ public class WelcomePage extends AppCompatActivity {
                 viewEventsButton.setVisibility(View.VISIBLE);
                 editEventTypesButton.setVisibility(View.VISIBLE);
                 editUsersButton.setVisibility(View.VISIBLE);
+                Welcome = findViewById(R.id.userName);
+                Welcome.setOnClickListener(v -> {
+                    String username = preferences.getString("username", "");
+                    Intent intent = new Intent(getApplicationContext(), ProfileView.class);
+                    intent.putExtra("username", username);
+                    startActivity(intent);
+                    finish();
+                });
+
+                DatabaseReference profileRef = FirebaseDatabase.getInstance().getReference("Profile").child(savedUsername);
+                profileRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            // Convert DataSnapshot to Profile object
+                            Profile profile = dataSnapshot.getValue(Profile.class);
+
+                            // Validate profile data
+                            if (profile != null) {
+                                if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null || profile.getLocation() == null) {
+                                    Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
+                                    intent.putExtra("username", savedUsername);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            } else {
+                                // Handle the case where the profile is null
+                            }
+                        } else {
+                            // If the profile node does not exist, redirect to ProfileSettings
+                            Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
+                            intent.putExtra("username", savedUsername);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle errors if needed
+                    }
+                });
+
                 break;
             case "CyclingClub":
                 createEventsButton.setVisibility(View.VISIBLE);
                 viewEventsButton.setVisibility(View.VISIBLE);
+                Welcome = findViewById(R.id.userName);
+                Welcome.setOnClickListener(v -> {
+                    String username = preferences.getString("username", "");
+                    Intent intent = new Intent(getApplicationContext(), ProfileView.class);
+                    intent.putExtra("username", username);
+                    startActivity(intent);
+                    finish();
+                });
+                DatabaseReference profileRefs = FirebaseDatabase.getInstance().getReference("Profile").child(savedUsername);
+                profileRefs.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            // Convert DataSnapshot to Profile object
+                            Profile profile = dataSnapshot.getValue(Profile.class);
+
+                            // Validate profile data
+                            if (profile != null) {
+                                if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null || profile.getLocation() == null) {
+                                    Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
+                                    intent.putExtra("username", savedUsername);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            } else {
+                                // Handle the case where the profile is null
+                            }
+                        } else {
+                            // If the profile node does not exist, redirect to ProfileSettings
+                            Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
+                            intent.putExtra("username", savedUsername);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle errors if needed
+                    }
+                });
+
                 break;
+            case "Participant":
+                createEventsButton.setVisibility(View.VISIBLE);
+                viewEventsButton.setVisibility(View.VISIBLE);
+                editEventTypesButton.setVisibility(View.VISIBLE);
+                editUsersButton.setVisibility(View.VISIBLE);
+
+                viewEventsButton.setText("Find Club");
+                createEventsButton.setText("Manage Events");
+                editEventTypesButton.setText("Friends");
+                editUsersButton.setText("Rate Club");
+                viewEventsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Start the activity for editing users (replace with the correct activity)
+                        Intent intent = new Intent(getApplicationContext(), ClubFeed.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                createEventsButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Start the activity for editing users (replace with the correct activity)
+                        Intent intent = new Intent(getApplicationContext(), ParticipantEventManagement.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                editEventTypesButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Start the activity for editing event types (replace with the correct activity)
+                        Intent intent = new Intent(getApplicationContext(), FriendsPage.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                editUsersButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Start the activity for editing event types (replace with the correct activity)
+                        Intent intent = new Intent(getApplicationContext(), ClubFeedback.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+
+
         }
     }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), WelcomePage.class);
+        startActivity(intent);
+        finish();
+    }
+
 }
