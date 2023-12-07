@@ -398,17 +398,24 @@ public class ProfileSettings extends AppCompatActivity {
                     }
                 }
                 else{
-                    if (editText.getText().toString().equals("")){
+                    if (editText.getText().toString().equals("")) {
                         Toast.makeText(ProfileSettings.this, "Enter Social Media Link", Toast.LENGTH_SHORT).show();
                         return;
-                    }
-                    try {
-                        URL url = new URL(editText.getText().toString());
-                        String host = url.getHost();
-                        String subdomain = extractSubdomain(host);
-                        socialMediaLinks.put(subdomain, editText.getText().toString());
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } else {
+                        // Validate the social media link format
+                        if (isValidSocialMediaLink(editText.getText().toString())) {
+                            try {
+                                URL url = new URL(editText.getText().toString());
+                                String host = url.getHost();
+                                String subdomain = extractSubdomain(host);
+                                socialMediaLinks.put(subdomain, editText.getText().toString());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Toast.makeText(ProfileSettings.this, "Invalid Social Media Link Format", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
                 }
             }
@@ -424,6 +431,11 @@ public class ProfileSettings extends AppCompatActivity {
 
         // The domain is the last part (index length-1)
         return parts.length > 1 ? parts[parts.length - 2] : "";
+    }
+    private boolean isValidSocialMediaLink(String link) {
+        // Add your validation logic here
+        // For example, check if the link starts with "https://www."
+        return link.startsWith("https://www.");
     }
 
     private void updateToFirebase(Profile profile, String username){

@@ -55,9 +55,10 @@
             android:id="@+id/roundButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
             android:layout_gravity="center_vertical"
-            android:backgroundTint="#7169E4" />
+            android:layout_marginLeft="5dp"
+            android:backgroundTint="#7169E4"
+            android:maxLines="1" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

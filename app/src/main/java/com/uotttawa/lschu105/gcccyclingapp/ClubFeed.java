@@ -327,22 +327,26 @@ public class ClubFeed extends AppCompatActivity {
                 for (DataSnapshot profileSnapShot : dataSnapshot.getChildren()) {
                     Profile profile = profileSnapShot.getValue(Profile.class);
 
-                    if ((profile.getTags() != null && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())) || (profile.getTags() != null && cyclingclubSearch.equals(""))) {
-                        for (String tag : profile.getTags()) {
-                            for (String selectedTag : selectedTags) {
-                                if (tag.contains(selectedTag)) {
-                                    profiles.add(profile);
-                                    createClubCard(profile);
+                    try {
+                        if ((profile.getTags() != null && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())) || (profile.getTags() != null && cyclingclubSearch.equals(""))) {
+                            for (String tag : profile.getTags()) {
+                                for (String selectedTag : selectedTags) {
+                                    if (tag.contains(selectedTag)) {
+                                        profiles.add(profile);
+                                        createClubCard(profile);
+                                    }
                                 }
                             }
-                        }
-                        if (selectedTags.isEmpty() && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())){
+                            if (selectedTags.isEmpty() && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())) {
+                                profiles.add(profile);
+                                createClubCard(profile);
+                            }
+                        } else if (selectedTags.isEmpty() && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())) {
                             profiles.add(profile);
                             createClubCard(profile);
                         }
-                    } else if (selectedTags.isEmpty() && profile.getUsername().toLowerCase().contains(cyclingclubSearch.toLowerCase())){
-                        profiles.add(profile);
-                        createClubCard(profile);
+                    }catch (Exception e){
+
                     }
                 }
             }

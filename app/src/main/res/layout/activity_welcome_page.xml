@@ -165,7 +165,7 @@
                     android:layout_marginRight="5dp"
                     android:layout_weight="1"
                     android:backgroundTint="#BFBBCB"
-                    android:text="Edit Events"
+                    android:text="Edit Event Types"
                     android:visibility="invisible"
                     app:cornerRadius="22sp" />
 

@@ -104,11 +104,11 @@ public class WelcomePage extends AppCompatActivity {
         switch (savedRole) {
             case "Admin":
                 cardTitleBold.setText("Create new Event");
-                cardSubtitle.setText("Admin Card Subtitle");
+                cardSubtitle.setText("Admin");
                 break;
             case "CyclingClub":
                 cardTitleBold.setText("Create new Event");
-                cardSubtitle.setText("Cycling Club Card Subtitle");
+                cardSubtitle.setText("Organize Cycling events");
                 break;
             case "Participant":
                 cardTitleBold.setText("Join an Event");
