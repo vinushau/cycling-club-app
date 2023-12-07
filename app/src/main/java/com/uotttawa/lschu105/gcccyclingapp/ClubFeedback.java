@@ -65,11 +65,17 @@ public class ClubFeedback extends AppCompatActivity {
         EditText searchField = findViewById(R.id.searchField);
 
         tagContainerLayout = findViewById(R.id.tagContainerLayout);
-        ImageView filterIcon = findViewById(R.id.filterIcon);
         DatabaseReference eventTypesRef = FirebaseDatabase.getInstance().getReference("EventTypes");
         profiles = new ArrayList<>();
         selectedTags = new ArrayList<>();
-        loadEventsFromFirebase();
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        String userRole = preferences.getString("role", "");
+        if ("CyclingClub".equals(userRole)) {
+            findViewById(R.id.searchcontainer).setVisibility(View.GONE);
+            compileReviewsForCyclingClub();
+        }else {
+            loadEventsFromFirebase();
+        }
 
         eventTypesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -138,7 +144,6 @@ public class ClubFeedback extends AppCompatActivity {
     }
 
     private void RateClub(Profile profile) {
-
         // Create a dialog to display event type details
         Dialog dialog = new Dialog(ClubFeedback.this);
         dialog.setContentView(R.layout.rate);
@@ -202,10 +207,7 @@ public class ClubFeedback extends AppCompatActivity {
                 Toast.makeText(this,"Invalid Rating", Toast.LENGTH_SHORT).show();
                 return;
             }
-            profile.addRatings(username, ratings);
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Profile").child(profile.getUsername());
-            databaseReference.setValue(profile);
-            addReviewToFirebase(profile.getUsername(), username, ratings, description.getText().toString());
+            addReviewToFirebase(profile, profile.getUsername(), username, ratings, description.getText().toString());
             dialog.dismiss();
             windowManager.removeView(dimOverlay);
         });
@@ -302,8 +304,6 @@ public class ClubFeedback extends AppCompatActivity {
         return selectedTags;
     }
 
-
-
     //Filters out events that do not contain whats in the search field
     private void searchBar(String searchField){
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Profile");
@@ -331,7 +331,20 @@ public class ClubFeedback extends AppCompatActivity {
         });
 
     }
-    public void addReviewToFirebase(String cyclingClubName, String username, int rating, String feedback) {
+    public void addReviewToFirebase(Profile profile, String cyclingClubName, String username, int rating, String feedback) {
+        if (rating == 0 && feedback.equals(null)){
+            Toast.makeText(this,"Fill out fields", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (rating == 0) {
+            Toast.makeText(this,"Invalid Rating", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (feedback.equals(null)){
+            Toast.makeText(this,"Invalid Description", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        profile.addRatings(username, ratings);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Profile").child(profile.getUsername());
+        databaseReference.setValue(profile);
         DatabaseReference reviewsRef = FirebaseDatabase.getInstance().getReference().child("Reviews")
                 .child(cyclingClubName).child(username);
 
@@ -340,8 +353,139 @@ public class ClubFeedback extends AppCompatActivity {
         reviewData.put("feedback", feedback);
 
         reviewsRef.setValue(reviewData);
+
     }
 
+
+    private void compileReviewsForCyclingClub() {
+        DatabaseReference reviewsRef = FirebaseDatabase.getInstance().getReference().child("Reviews");
+        SharedPreferences preferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        String username = preferences.getString("username", "");
+
+        reviewsRef.child(username).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot reviewSnapshot : dataSnapshot.getChildren()) {
+                    String username = reviewSnapshot.getKey();
+                    int rating = reviewSnapshot.child("rating").getValue(Integer.class);
+                    String feedback = reviewSnapshot.child("feedback").getValue(String.class);
+                    System.out.println("Rating: " + rating);
+                    System.out.println("Feedback: " + feedback);
+
+                    createReviewCard(username, rating, feedback);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle onCancelled event
+            }
+        });
+    }
+
+    private void createReviewCard(String username, int rating, String feedback) {
+        View cardView = LayoutInflater.from(ClubFeedback.this).inflate(R.layout.club_card, null);
+
+        TextView eventNameTextView = cardView.findViewById(R.id.TitleName);
+        eventNameTextView.setText("@" + username);
+
+        Button roundButton = cardView.findViewById(R.id.roundButton);
+        roundButton.setText("View");
+        roundButton.setTextColor(Color.WHITE);
+        roundButton.setOnClickListener(v -> showFeedback(rating, feedback));
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        int marginInDp = 20;
+        int marginInPixels = (int) (marginInDp * getResources().getDisplayMetrics().density);
+        int sidemarginInDp = 18;
+        int sidemargininPixels = (int) (sidemarginInDp * getResources().getDisplayMetrics().density);
+
+        layoutParams.setMargins(sidemargininPixels, 5, sidemargininPixels, marginInPixels);
+        cardView.setLayoutParams(layoutParams);
+        ShapeableImageView image = cardView.findViewById(R.id.ProfilePicture);
+        containerLayout = findViewById(R.id.eventContainer);
+        containerLayout.addView(cardView);
+    }
+
+    private void showFeedback(int rating, String feedback) {
+        Dialog dialog = new Dialog(ClubFeedback.this);
+        dialog.setContentView(R.layout.rate);
+
+        // Set dialog title
+        TextView dialogTitle = dialog.findViewById(R.id.dialogTitle2);
+        EditText feedbackField = dialog.findViewById(R.id.clubFeedbackField);
+        feedbackField.setClickable(false);
+        feedbackField.setText(feedback);
+        // Set up dialog button
+        Button dialogButton = dialog.findViewById(R.id.dialogButton);
+        Button dialogButton2 = dialog.findViewById(R.id.dialogButton2);
+        dialogButton2.setText("Ok");
+        dialogButton.setVisibility(View.GONE);
+        dialogButton.setBackgroundColor(Color.parseColor("#7169E4"));
+        dialogButton.setTextColor(Color.WHITE);
+        ;
+        // Set dialog dimensions
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(dialog.getWindow().getAttributes());
+
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int dialogWidth = (int) (displayMetrics.widthPixels * 0.8f);
+        int dialogHeight = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        layoutParams.width = dialogWidth;
+        layoutParams.height = dialogHeight;
+
+        // Add dim overlay to the window
+        WindowManager.LayoutParams dimLayoutParams = new WindowManager.LayoutParams();
+        dimLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        dimLayoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+        dimLayoutParams.format = PixelFormat.TRANSLUCENT;
+
+        WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        View dimOverlay = new View(ClubFeedback.this);
+        dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
+        windowManager.addView(dimOverlay, dimLayoutParams);
+
+        dialog.getWindow().setAttributes(layoutParams);
+        dialogButton2.setOnClickListener(v -> {
+            dialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+        // Set dismiss listeners and touch behavior
+        dialogButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+
+        dimOverlay.setOnClickListener(v -> {
+            dialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setOnDismissListener(dialogInterface -> windowManager.removeView(dimOverlay));
+
+        dialog.show();
+
+        dialogButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            windowManager.removeView(dimOverlay);
+        });
+
+
+        ImageButton[] stars = new ImageButton[]{
+                dialog.findViewById(R.id.star1),
+                dialog.findViewById(R.id.star2),
+                dialog.findViewById(R.id.star3),
+                dialog.findViewById(R.id.star4),
+                dialog.findViewById(R.id.star5)
+        };
+        setStarColor(rating, stars);
+    }
 
     @Override
     public void onBackPressed() {

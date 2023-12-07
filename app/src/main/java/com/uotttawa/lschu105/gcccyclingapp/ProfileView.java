@@ -74,9 +74,12 @@ public class ProfileView extends AppCompatActivity {
             startActivity(Intent);
             finish();
         });
+        TextView rating = findViewById(R.id.rating);
+        DatabaseReference ratings = FirebaseDatabase.getInstance().getReference().child("Profile").child(username).child("ratings");
         loadEventsFromFirebase();
         loadProfilePicture(username);
         loadProfile(username);
+        loadAndDisplayRatings(username);
         ascending = -1;
 
         imageView = findViewById(R.id.profilepicture);
@@ -128,6 +131,58 @@ public class ProfileView extends AppCompatActivity {
                 // Handle errors
             }
         });
+    }
+
+
+    private void loadAndDisplayRatings(String username) {
+        DatabaseReference profileRef = FirebaseDatabase.getInstance().getReference().child("Profile").child(username);
+
+        // Retrieve ratings from Firebase
+        profileRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Map<String, Long> ratingsMap = new HashMap<>();
+
+                    // Check if ratings node exists in the profile
+                    if (dataSnapshot.hasChild("ratings")) {
+                        DataSnapshot ratingsSnapshot = dataSnapshot.child("ratings");
+
+                        for (DataSnapshot ratingSnapshot : ratingsSnapshot.getChildren()) {
+                            String eventId = ratingSnapshot.getKey();
+                            long ratingValue = (long) ratingSnapshot.getValue();
+                            ratingsMap.put(eventId, ratingValue);
+                        }
+                    }
+
+                    // Calculate average rating
+                    double averageRating = calculateAverageRating(ratingsMap);
+
+                    // Display the average rating in your TextView
+                    TextView ratingTextView = findViewById(R.id.rating); // Replace with your actual TextView ID
+                    String ratingText = String.format("%.1f", averageRating);
+                    ratingTextView.setText(ratingText);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle errors
+            }
+        });
+    }
+    private double calculateAverageRating(Map<String, Long> ratingsMap) {
+        // Calculate the average rating
+        if (ratingsMap.isEmpty()) {
+            return 0.0;
+        }
+
+        long totalRating = 0;
+        for (long ratingValue : ratingsMap.values()) {
+            totalRating += ratingValue;
+        }
+
+        return (double) totalRating / ratingsMap.size();
     }
 
     private void openGallery() {

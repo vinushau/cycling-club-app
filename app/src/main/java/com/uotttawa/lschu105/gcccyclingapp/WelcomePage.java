@@ -185,53 +185,15 @@ public class WelcomePage extends AppCompatActivity {
                 viewEventsButton.setVisibility(View.VISIBLE);
                 editEventTypesButton.setVisibility(View.VISIBLE);
                 editUsersButton.setVisibility(View.VISIBLE);
-                Welcome = findViewById(R.id.userName);
-                Welcome.setOnClickListener(v -> {
-                    String username = preferences.getString("username", "");
-                    Intent intent = new Intent(getApplicationContext(), ProfileView.class);
-                    intent.putExtra("username", username);
-                    startActivity(intent);
-                    finish();
-                });
-
-                DatabaseReference profileRef = FirebaseDatabase.getInstance().getReference("Profile").child(savedUsername);
-                profileRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            // Convert DataSnapshot to Profile object
-                            Profile profile = dataSnapshot.getValue(Profile.class);
-
-                            // Validate profile data
-                            if (profile != null) {
-                                if (profile.getSocialMediaLinks() == null || profile.getPhoneNumber() == null || profile.getLocation() == null) {
-                                    Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
-                                    intent.putExtra("username", savedUsername);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            } else {
-                                // Handle the case where the profile is null
-                            }
-                        } else {
-                            // If the profile node does not exist, redirect to ProfileSettings
-                            Intent intent = new Intent(getApplicationContext(), ProfileSettings.class);
-                            intent.putExtra("username", savedUsername);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        // Handle errors if needed
-                    }
-                });
-
                 break;
             case "CyclingClub":
                 createEventsButton.setVisibility(View.VISIBLE);
                 viewEventsButton.setVisibility(View.VISIBLE);
+                editEventTypesButton.setVisibility(View.VISIBLE);
+                editUsersButton.setVisibility(View.VISIBLE);
+                editEventTypesButton.setText("Participants");
+                editUsersButton.setText("Feedback");
+
                 Welcome = findViewById(R.id.userName);
                 Welcome.setOnClickListener(v -> {
                     String username = preferences.getString("username", "");
@@ -271,6 +233,24 @@ public class WelcomePage extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         // Handle errors if needed
+                    }
+                });
+                editEventTypesButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Start the activity for editing event types (replace with the correct activity)
+                        Intent intent = new Intent(getApplicationContext(), FriendsPage.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                editUsersButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Start the activity for editing event types (replace with the correct activity)
+                        Intent intent = new Intent(getApplicationContext(), ClubFeedback.class);
+                        startActivity(intent);
+                        finish();
                     }
                 });
 

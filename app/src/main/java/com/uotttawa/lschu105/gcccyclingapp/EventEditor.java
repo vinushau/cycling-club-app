@@ -91,6 +91,7 @@ public class EventEditor {
         numberpicker.setVisibility(View.VISIBLE);
         EditText TitleField = dialog.findViewById(R.id.nameField);
         EditText locationField = dialog.findViewById(R.id.locationField);
+        locationField.setVisibility(View.VISIBLE);
         TitleField.setText(event.getEventName());
         try {
             locationField.setText(event.getLocation().toString());
@@ -394,7 +395,7 @@ public class EventEditor {
         }
 
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
-        EditText locationEditText = dialog.findViewById(R.id.location);
+        EditText locationEditText = dialog.findViewById(R.id.locationField);
         String eventNameField = eventNameEditText.getText().toString();
         String location = locationEditText.getText().toString();
 

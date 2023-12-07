@@ -232,7 +232,8 @@ public class EventCreation extends AppCompatActivity {
         numberPickerMonth = dialog.findViewById(R.id.numberPickerMonth);
         numberPickerYear = dialog.findViewById(R.id.numberPickerYear);
         container = dialog.findViewById(R.id.containerMonth);
-
+        EditText locationEditText = dialog.findViewById(R.id.locationField);
+        locationEditText.setVisibility(View.VISIBLE);
         LinearLayout number = dialog.findViewById(R.id.number);
         number.setVisibility(View.VISIBLE);
         selectedNumberDisplay = dialog.findViewById(R.id.selectedNumberDisplay);
@@ -383,6 +384,7 @@ public class EventCreation extends AppCompatActivity {
         Spinner spinner = dialog.findViewById(R.id.levelSpinner);
         EditText eventNameEditText = dialog.findViewById(R.id.nameField);
         EditText locationEditText = dialog.findViewById(R.id.locationField);
+
 
         // Check if a valid level is selected
         if (spinner.getSelectedItemPosition() == 0) {

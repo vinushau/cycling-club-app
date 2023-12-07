@@ -43,7 +43,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="Location (city)"
-                android:inputType="text" />
+                android:inputType="text"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/requirementsLayout"
