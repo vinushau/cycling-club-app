@@ -165,6 +165,7 @@
                     android:layout_marginRight="5dp"
                     android:layout_weight="1"
                     android:backgroundTint="#BFBBCB"
+                    android:ellipsize="end"
                     android:maxLines="1"
                     android:text="Edit Event Types"
                     android:visibility="invisible"
