@@ -134,6 +134,8 @@ public class EventTypesManagement extends AppCompatActivity {
         View dimOverlay = new View(EventTypesManagement.this);
         dimOverlay.setBackgroundColor(Color.argb(128, 0, 0, 0));
         windowManager.addView(dimOverlay, dimLayoutParams);
+        EditText location = dialog.findViewById(R.id.locationField);
+        location.setVisibility(View.GONE);
 
         // Dialog dismiss logic
         dialogButton.setOnClickListener(v -> {
@@ -259,7 +261,8 @@ public class EventTypesManagement extends AppCompatActivity {
 
         // Display dialog window
         dialog.show();
-
+        EditText location = dialog.findViewById(R.id.locationField);
+        location.setVisibility(View.GONE);
         // Setup button logic
         dialogButton.setOnClickListener(v -> {
             if (TextFieldValidation(dialog)) {
@@ -346,7 +349,9 @@ public class EventTypesManagement extends AppCompatActivity {
 
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
-                if (!editText.getHint().toString().toLowerCase().equals("name") && !editText.getHint().toString().toLowerCase().equals("description") && !editText.getHint().toString().equals("Add description") && !editText.getHint().toString().equals("Add Event Type Name")) {
+                EditText location = dialog.findViewById(R.id.locationField);
+                location.setHint("location");
+                if (!editText.getHint().toString().toLowerCase().equals("name") && !editText.getHint().toString().toLowerCase().equals("description") && !editText.getHint().toString().equals("Add description") && !editText.getHint().toString().equals("Add Event Type Name") && !editText.getHint().toString().equals("location")) {
                     String requirement = editText.getText().toString();
                     requirementsList.add(requirement);
                 }
@@ -364,7 +369,9 @@ public class EventTypesManagement extends AppCompatActivity {
 
             if (childView instanceof EditText) {
                 EditText editText = (EditText) childView;
-                if (editText.getText().toString().trim().isEmpty()) {
+                EditText location = dialog.findViewById(R.id.locationField);
+                location.setHint("location");
+                if (editText.getText().toString().trim().isEmpty() && !editText.getHint().toString().equals("location")) {
                     isValidationSuccessful = false;
                     break;
                 }
