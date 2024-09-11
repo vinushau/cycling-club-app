@@ -8,13 +8,20 @@ The Grimpeurs Cycling Club (GCC) App is a specialized mobile application that se
 - Firebase
 - Java
 
+## Screenshots of Android App
+![Login Page](Screenshot_2023-12-06_225703.png)
+![Register/Login Page](Screenshot_2023-12-06_225804.png)
+![Account Profile Page](Screenshot_2023-12-06_225209.png)
+![Cycling Clubs Page](Screenshot_2023-12-06_224829.png)
+![Home Page](Screenshot_2023-12-06_224149.png)
+
 ## Prerequisites
 - [Download and install Android Studio](https://developer.android.com/studio)
 - Ensure Android SDK and required components are installed
 
 ## How to Run the App
 
-### 1. Clone the repo.
+### 1. Clone the Repo
 
 ### 2. Open the Project in Android Studio
 - **Open the project**: `File` > `Open` > Select the project folder
